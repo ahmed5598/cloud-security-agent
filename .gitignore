@@ -1,0 +1,23 @@
+# Python
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+
+# VS Code extension
+cloud-security-agent/node_modules/
+cloud-security-agent/out/
+cloud-security-agent/*.vsix
+
+# Environment
+.env
+.env.*
+.venv
+
+# OS
+.DS_Store
