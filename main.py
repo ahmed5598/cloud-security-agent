@@ -4,9 +4,11 @@ from agent.security_agent import analyze_security
 
 app = FastAPI()
 
+
 class AnalyzeRequest(BaseModel):
     code: str
     filename: str
+
 
 @app.post("/analyze")
 def analyze(req: AnalyzeRequest):

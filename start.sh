@@ -16,6 +16,10 @@ source "$VENV/bin/activate"
 echo "==> Installing Python dependencies..."
 pip install -q -r "$PROJECT_DIR/requirements.txt"
 
+# 2.5 Initialize MITRE ATT&CK vector database
+echo "==> Initializing MITRE ATT&CK vector database..."
+python3 -c "from agent.vector_store import get_collection; c = get_collection(); print(f'    Loaded {c.count()} techniques into ChromaDB')"
+
 # 3. Check Docker is available
 echo "==> Checking Docker..."
 if ! command -v docker &>/dev/null; then
@@ -61,7 +65,7 @@ done
 
 # 6. Pull the model
 echo "==> Pulling model '$MODEL' (skipped if already present)..."
-docker exec -it ollama ollama pull "$MODEL"
+docker exec ollama ollama pull "$MODEL"
 
 # 7. Verify Ollama
 echo "==> Verifying Ollama..."
@@ -72,4 +76,4 @@ echo ""
 echo "==> Starting FastAPI server at http://127.0.0.1:8000"
 echo "    Docs: http://127.0.0.1:8000/docs"
 cd "$PROJECT_DIR"
-uvicorn main:app --reload
+uvicorn main:app --reload --reload-dir "$PROJECT_DIR/agent" --reload-dir "$PROJECT_DIR/data" --reload-include "main.py"

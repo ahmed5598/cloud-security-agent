@@ -1,0 +1,274 @@
+{
+  "techniques": [
+    {
+      "id": "T1078",
+      "name": "Valid Accounts",
+      "tactic": "Initial Access, Persistence, Privilege Escalation",
+      "platform": "AWS, Azure, GCP",
+      "description": "Adversaries may use valid accounts to gain initial access, persist, or escalate privileges. Overly permissive IAM policies and wildcard permissions enable abuse of legitimate credentials.",
+      "cloud_examples": "IAM policies with Action:*, wildcard Resource, broad assume-role trust policies, default service accounts with admin access",
+      "detection_patterns": "iam_policy, iam_role, assume_role, Action, *, AdministratorAccess, principal, aws_iam"
+    },
+    {
+      "id": "T1078.004",
+      "name": "Valid Accounts: Cloud Accounts",
+      "tactic": "Initial Access, Persistence",
+      "platform": "AWS, Azure, GCP",
+      "description": "Adversaries may use cloud accounts with excessive permissions. Shared credentials, long-lived access keys, and missing MFA enable unauthorized access.",
+      "cloud_examples": "IAM users without MFA, long-lived access keys, shared service account keys, root account usage",
+      "detection_patterns": "aws_iam_user, access_key, mfa, login_profile, google_service_account_key, azurerm_user"
+    },
+    {
+      "id": "T1530",
+      "name": "Data from Cloud Storage",
+      "tactic": "Collection",
+      "platform": "AWS, Azure, GCP",
+      "description": "Adversaries may access data from improperly secured cloud storage. Public buckets, missing encryption, and overly broad access policies expose sensitive data.",
+      "cloud_examples": "Public S3 buckets, public-read ACL, missing server-side encryption, open bucket policies, public Azure blob containers",
+      "detection_patterns": "aws_s3_bucket, acl, public-read, public, bucket_policy, encryption, server_side_encryption, azurerm_storage_account, google_storage_bucket"
+    },
+    {
+      "id": "T1537",
+      "name": "Transfer Data to Cloud Account",
+      "tactic": "Exfiltration",
+      "platform": "AWS, Azure, GCP",
+      "description": "Adversaries may transfer data to another cloud account they control. Cross-account access without restrictions and overly permissive sharing policies enable exfiltration.",
+      "cloud_examples": "S3 bucket policies allowing cross-account access, unrestricted AssumeRole from external accounts, shared snapshots",
+      "detection_patterns": "aws_s3_bucket_policy, cross_account, external_id, sts, assume_role, snapshot, ami, shared"
+    },
+    {
+      "id": "T1190",
+      "name": "Exploit Public-Facing Application",
+      "tactic": "Initial Access",
+      "platform": "AWS, Azure, GCP",
+      "description": "Adversaries exploit vulnerabilities in internet-facing services. Open security groups, public endpoints without authentication, and exposed management interfaces enable initial access.",
+      "cloud_examples": "Security groups with 0.0.0.0/0 ingress, public subnets without NACLs, exposed SSH/RDP ports, public load balancers without WAF",
+      "detection_patterns": "aws_security_group, ingress, 0.0.0.0/0, cidr_blocks, ::/0, from_port, to_port, publicly_accessible, azurerm_network_security_rule"
+    },
+    {
+      "id": "T1098",
+      "name": "Account Manipulation",
+      "tactic": "Persistence, Privilege Escalation",
+      "platform": "AWS, Azure, GCP",
+      "description": "Adversaries may manipulate accounts to maintain access or escalate privileges. Unrestricted role creation, inline admin policies, and overly broad permission boundaries enable persistence.",
+      "cloud_examples": "IAM policies allowing iam:*, unrestricted CreateRole/AttachPolicy, missing permission boundaries, inline admin policies",
+      "detection_patterns": "iam_policy, iam:*, CreateRole, AttachRolePolicy, PutRolePolicy, permissions_boundary, inline_policy"
+    },
+    {
+      "id": "T1562",
+      "name": "Impair Defenses",
+      "tactic": "Defense Evasion",
+      "platform": "AWS, Azure, GCP",
+      "description": "Adversaries may disable or tamper with security monitoring. Disabled logging, removed CloudTrail, turned off GuardDuty, or suppressed alerts allow adversaries to operate undetected.",
+      "cloud_examples": "CloudTrail with logging disabled, S3 bucket logging off, GuardDuty disabled, VPC flow logs missing, disabled Azure Security Center",
+      "detection_patterns": "aws_cloudtrail, is_multi_region_trail, enable_logging, aws_guardduty, vpc_flow_log, logging, monitoring, azurerm_security_center"
+    },
+    {
+      "id": "T1562.008",
+      "name": "Impair Defenses: Disable Cloud Logs",
+      "tactic": "Defense Evasion",
+      "platform": "AWS, Azure, GCP",
+      "description": "Adversaries may disable cloud logging to avoid detection. Turning off CloudTrail, deleting log groups, or disabling access logging removes audit trails.",
+      "cloud_examples": "CloudTrail with enable_logging=false, missing S3 access logging, deleted CloudWatch log groups, disabled GCP audit logs",
+      "detection_patterns": "enable_logging, false, cloudtrail, cloudwatch_log_group, access_logging, audit_log_config"
+    },
+    {
+      "id": "T1580",
+      "name": "Cloud Infrastructure Discovery",
+      "tactic": "Discovery",
+      "platform": "AWS, Azure, GCP",
+      "description": "Adversaries may discover cloud infrastructure details. Exposed metadata endpoints, IMDSv1 usage, and overly broad describe/list permissions reveal infrastructure topology.",
+      "cloud_examples": "EC2 instances using IMDSv1 instead of IMDSv2, overly broad ec2:Describe* permissions, exposed metadata services",
+      "detection_patterns": "metadata_options, http_tokens, http_endpoint, IMDSv2, instance_metadata, ec2:Describe, http_put_response_hop_limit"
+    },
+    {
+      "id": "T1552",
+      "name": "Unsecured Credentials",
+      "tactic": "Credential Access",
+      "platform": "AWS, Azure, GCP",
+      "description": "Adversaries may search for unsecured credentials in cloud infrastructure code. Hardcoded secrets, API keys, passwords, and connection strings in plaintext enable credential theft.",
+      "cloud_examples": "Hardcoded AWS access keys in Terraform, passwords in user_data scripts, API keys in environment variables, plaintext secrets in config",
+      "detection_patterns": "access_key, secret_key, password, api_key, connection_string, user_data, AKIA, private_key, credentials"
+    },
+    {
+      "id": "T1552.005",
+      "name": "Unsecured Credentials: Cloud Instance Metadata API",
+      "tactic": "Credential Access",
+      "platform": "AWS, Azure, GCP",
+      "description": "Adversaries may access the cloud instance metadata API to collect credentials. IMDSv1 allows unauthenticated access to instance credentials via HTTP.",
+      "cloud_examples": "EC2 instances without IMDSv2 enforcement, missing http_tokens=required, metadata endpoint exposed to containers",
+      "detection_patterns": "metadata_options, http_tokens, optional, required, http_endpoint, instance_metadata_tags"
+    },
+    {
+      "id": "T1048",
+      "name": "Exfiltration Over Alternative Protocol",
+      "tactic": "Exfiltration",
+      "platform": "AWS, Azure, GCP",
+      "description": "Adversaries may exfiltrate data using non-standard protocols. Unrestricted egress rules, open outbound ports, and missing network ACLs enable data exfiltration.",
+      "cloud_examples": "Security groups with unrestricted egress (0.0.0.0/0 on all ports), missing outbound NACLs, no VPC endpoints for S3",
+      "detection_patterns": "egress, outbound, 0.0.0.0/0, all, nacl, network_acl, vpc_endpoint, aws_security_group_rule"
+    },
+    {
+      "id": "T1496",
+      "name": "Resource Hijacking",
+      "tactic": "Impact",
+      "platform": "AWS, Azure, GCP",
+      "description": "Adversaries may hijack cloud resources for cryptomining or other purposes. Missing resource constraints, no budget alerts, and unbounded instance types enable resource abuse.",
+      "cloud_examples": "No AWS budget alerts, unbounded auto-scaling groups, large instance types without justification, missing resource quotas",
+      "detection_patterns": "aws_budgets_budget, autoscaling_group, max_size, instance_type, quota, budget, cost"
+    },
+    {
+      "id": "T1110",
+      "name": "Brute Force",
+      "tactic": "Credential Access",
+      "platform": "AWS, Azure, GCP",
+      "description": "Adversaries may use brute force to obtain credentials. Missing account lockout policies, weak password requirements, and exposed authentication endpoints enable brute force attacks.",
+      "cloud_examples": "IAM password policy with short minimum length, no account lockout, Cognito without MFA, exposed RDS/database ports",
+      "detection_patterns": "aws_iam_account_password_policy, minimum_password_length, max_password_age, require_uppercase, cognito, password_policy"
+    },
+    {
+      "id": "T1136.003",
+      "name": "Create Account: Cloud Account",
+      "tactic": "Persistence",
+      "platform": "AWS, Azure, GCP",
+      "description": "Adversaries may create cloud accounts to maintain persistence. Unrestricted ability to create IAM users or service accounts enables backdoor access.",
+      "cloud_examples": "IAM policies allowing iam:CreateUser without conditions, service account creation without org policy constraints",
+      "detection_patterns": "iam:CreateUser, iam:CreateAccessKey, CreateServiceAccount, create_user, aws_iam_user"
+    },
+    {
+      "id": "T1525",
+      "name": "Implant Internal Image",
+      "tactic": "Persistence",
+      "platform": "AWS, Azure, GCP",
+      "description": "Adversaries may implant backdoors in cloud images. Public AMIs, unverified container images, and registries without scanning enable supply chain attacks.",
+      "cloud_examples": "Public AMIs used without verification, ECR without image scanning, Docker images from untrusted registries",
+      "detection_patterns": "aws_ami, image_id, ecr, image_scanning_configuration, scan_on_push, container_registry, docker"
+    },
+    {
+      "id": "T1556",
+      "name": "Modify Authentication Process",
+      "tactic": "Credential Access, Defense Evasion, Persistence",
+      "platform": "AWS, Azure, GCP",
+      "description": "Adversaries may modify authentication mechanisms. Custom identity providers, modified federation settings, or weakened auth requirements enable unauthorized access.",
+      "cloud_examples": "SAML/OIDC providers with weak validation, Cognito with no MFA, modified IAM identity providers, weakened conditional access",
+      "detection_patterns": "aws_iam_saml_provider, aws_iam_openid_connect_provider, cognito_user_pool, mfa_configuration, identity_provider"
+    },
+    {
+      "id": "T1578",
+      "name": "Modify Cloud Compute Infrastructure",
+      "tactic": "Defense Evasion",
+      "platform": "AWS, Azure, GCP",
+      "description": "Adversaries may modify cloud compute infrastructure to evade detection. Creating snapshots, modifying instances, or changing security groups can bypass controls.",
+      "cloud_examples": "Unrestricted EC2 modify/run permissions, ability to create snapshots of any volume, unrestricted security group modification",
+      "detection_patterns": "ec2:ModifyInstanceAttribute, ec2:RunInstances, ec2:CreateSnapshot, modify_instance, create_snapshot"
+    },
+    {
+      "id": "T1610",
+      "name": "Deploy Container",
+      "tactic": "Defense Evasion, Execution",
+      "platform": "AWS, Azure, GCP",
+      "description": "Adversaries may deploy containers to execute malicious code. Privileged containers, host network access, and missing pod security policies enable container breakout.",
+      "cloud_examples": "Privileged containers in ECS/EKS, host network mode, missing pod security standards, containers running as root",
+      "detection_patterns": "privileged, host_network, security_context, run_as_root, pod_security, ecs_task_definition, eks, container_definitions"
+    },
+    {
+      "id": "T1611",
+      "name": "Escape to Host",
+      "tactic": "Privilege Escalation",
+      "platform": "AWS, Azure, GCP",
+      "description": "Adversaries may escape container isolation to access the host. Privileged mode, host path mounts, and capability additions enable container escape.",
+      "cloud_examples": "Docker containers with --privileged, host volume mounts, added Linux capabilities (SYS_ADMIN), missing seccomp profiles",
+      "detection_patterns": "privileged, host_path, volume_mount, capabilities, SYS_ADMIN, seccomp, AppArmor, security_context"
+    },
+    {
+      "id": "T1613",
+      "name": "Container and Resource Discovery",
+      "tactic": "Discovery",
+      "platform": "AWS, Azure, GCP",
+      "description": "Adversaries may discover containers and cloud resources. Overly broad list/describe permissions on ECS, EKS, or other container services reveal infrastructure.",
+      "cloud_examples": "Broad ecs:List*/Describe* permissions, exposed Kubernetes API server, public container registry",
+      "detection_patterns": "ecs:List, ecs:Describe, eks:List, eks:Describe, kubernetes, api_server, container_registry, ecr"
+    },
+    {
+      "id": "T1619",
+      "name": "Cloud Storage Object Discovery",
+      "tactic": "Discovery",
+      "platform": "AWS, Azure, GCP",
+      "description": "Adversaries may enumerate cloud storage objects. Broad s3:List* permissions and bucket policies without conditions enable storage enumeration.",
+      "cloud_examples": "IAM policies with s3:ListBucket on *, public bucket listing enabled, storage account with public blob enumeration",
+      "detection_patterns": "s3:ListBucket, s3:GetObject, list_objects, public_access, blob_public_access, storage_account"
+    },
+    {
+      "id": "T1485",
+      "name": "Data Destruction",
+      "tactic": "Impact",
+      "platform": "AWS, Azure, GCP",
+      "description": "Adversaries may destroy cloud data. Missing deletion protection, no versioning on S3 buckets, and unrestricted delete permissions enable permanent data loss.",
+      "cloud_examples": "S3 buckets without versioning, RDS without deletion protection, DynamoDB without PITR, missing backup policies",
+      "detection_patterns": "versioning, deletion_protection, backup, point_in_time_recovery, lifecycle, mfa_delete, prevent_destroy"
+    },
+    {
+      "id": "T1486",
+      "name": "Data Encrypted for Impact",
+      "tactic": "Impact",
+      "platform": "AWS, Azure, GCP",
+      "description": "Adversaries may encrypt data for ransom. Unrestricted KMS key usage, missing key rotation, and broad encryption/decryption permissions enable ransomware attacks.",
+      "cloud_examples": "KMS keys without rotation, broad kms:Encrypt/Decrypt permissions, customer-managed keys accessible to external accounts",
+      "detection_patterns": "aws_kms_key, enable_key_rotation, kms:Encrypt, kms:Decrypt, key_policy, key_rotation"
+    },
+    {
+      "id": "T1499",
+      "name": "Endpoint Denial of Service",
+      "tactic": "Impact",
+      "platform": "AWS, Azure, GCP",
+      "description": "Adversaries may perform denial of service attacks on cloud endpoints. Missing rate limiting, no WAF, and exposed APIs without throttling enable service disruption.",
+      "cloud_examples": "API Gateway without throttling, CloudFront without WAF, ALB without rate limiting, missing DDoS protection (Shield)",
+      "detection_patterns": "aws_api_gateway, throttling, waf, aws_wafv2, shield, rate_limit, cloudfront, api_gateway_method_settings"
+    },
+    {
+      "id": "T1021.004",
+      "name": "Remote Services: SSH",
+      "tactic": "Lateral Movement",
+      "platform": "AWS, Azure, GCP",
+      "description": "Adversaries may use SSH for lateral movement. Open SSH ports to the internet, key-based auth without restrictions, and missing bastion hosts enable unauthorized remote access.",
+      "cloud_examples": "Security groups with port 22 open to 0.0.0.0/0, EC2 instances with public IPs and open SSH, missing bastion/jump hosts",
+      "detection_patterns": "port, 22, ssh, 0.0.0.0/0, bastion, key_name, associate_public_ip_address"
+    },
+    {
+      "id": "T1550.001",
+      "name": "Use Alternate Authentication Material: Application Access Token",
+      "tactic": "Defense Evasion, Lateral Movement",
+      "platform": "AWS, Azure, GCP",
+      "description": "Adversaries may use stolen application access tokens. Long-lived tokens, missing token rotation, and broadly scoped OAuth grants enable unauthorized API access.",
+      "cloud_examples": "Lambda functions with broad execution roles, API keys without expiration, OAuth scopes without least privilege",
+      "detection_patterns": "lambda, execution_role, api_key, token, oauth, scope, expiration, rotation"
+    },
+    {
+      "id": "T1538",
+      "name": "Cloud Service Dashboard",
+      "tactic": "Discovery",
+      "platform": "AWS, Azure, GCP",
+      "description": "Adversaries may use cloud dashboards to discover resources. Console access without IP restrictions and missing session policies enable reconnaissance via the management console.",
+      "cloud_examples": "IAM users with console access but no IP restriction, missing session duration limits, no conditional access policies",
+      "detection_patterns": "console_access, login_profile, session_duration, ip_restriction, condition, source_ip, aws:SourceIp"
+    },
+    {
+      "id": "T1583.006",
+      "name": "Acquire Infrastructure: Web Services",
+      "tactic": "Resource Development",
+      "platform": "AWS, Azure, GCP",
+      "description": "Adversaries may use web services for C2 or staging. Unrestricted Lambda/Cloud Function invocation and public API endpoints enable adversary infrastructure within the victim's cloud.",
+      "cloud_examples": "Publicly invocable Lambda functions, API Gateway without auth, Cloud Functions with allUsers invoke permission",
+      "detection_patterns": "aws_lambda_permission, principal, *, invoke, api_gateway_authorizer, allUsers, function_url"
+    },
+    {
+      "id": "T1489",
+      "name": "Service Stop",
+      "tactic": "Impact",
+      "platform": "AWS, Azure, GCP",
+      "description": "Adversaries may stop cloud services to cause disruption. Unrestricted stop/terminate permissions and missing termination protection enable service disruption.",
+      "cloud_examples": "EC2 without termination protection, RDS without deletion protection, unrestricted ec2:StopInstances/TerminateInstances",
+      "detection_patterns": "disable_api_termination, termination_protection, ec2:StopInstances, ec2:TerminateInstances, deletion_protection"
+    }
+  ]
+}

@@ -18,6 +18,10 @@ cloud-security-agent/*.vsix
 .env
 .env.*
 .venv
+venv
+
+# ChromaDB vector store
+data/chroma_db/
 
 # OS
 .DS_Store
