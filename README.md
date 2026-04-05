@@ -115,15 +115,62 @@ If you prefer to install Ollama directly without Docker:
      }'
    ```
 
+## MITRE ATT&CK MCP Server
+
+This project includes an MCP (Model Context Protocol) server that connects to the official MITRE ATT&CK STIX data and keeps the security agent's knowledge base up to date.
+
+### How It Works
+
+The MCP server (`mcp_server/mitre_attack_server.py`) fetches cloud-relevant MITRE ATT&CK techniques from GitHub's `mitre/cti` repository and syncs them into the project's ChromaDB vector store.
+
+**Important:** The `data/mitre_techniques.json` file is **auto-populated when Claude Code starts**, not when `start.sh` is executed. Claude Code reads `.mcp.json`, spawns the MCP server, and the server automatically downloads the latest MITRE ATT&CK data, writes it to `data/mitre_techniques.json`, and re-indexes ChromaDB. If you run `start.sh` without Claude Code, the vector store will use whatever data is already in the JSON file.
+
+### Available MCP Tools
+
+| Tool | Description |
+|------|-------------|
+| `fetch_cloud_techniques()` | Fetch all cloud-relevant techniques from MITRE ATT&CK |
+| `get_technique(technique_id)` | Get full details of a technique by ID (e.g. `T1078`) |
+| `search_techniques(query)` | Search techniques by keyword |
+| `sync_to_vectorstore()` | Manually sync techniques to `mitre_techniques.json` and re-index ChromaDB |
+
+### Setup
+
+1. Install the MCP server dependencies:
+
+   ```bash
+   pip install -r mcp_server/requirements.txt
+   ```
+
+2. The `.mcp.json` file at the project root registers the server with Claude Code. On next Claude Code startup, the server will launch automatically and sync the MITRE ATT&CK data.
+
+## RAG Pipeline
+
+The security agent uses a RAG (Retrieval-Augmented Generation) pipeline to analyze infrastructure code:
+
+1. **Indexing** -- MITRE ATT&CK techniques are embedded into ChromaDB using the all-MiniLM-L6-v2 model
+2. **Retrieval** -- When code is submitted, ChromaDB finds the 5 most semantically similar techniques via cosine similarity
+3. **Generation** -- Only those 5 relevant techniques are injected into the LLM prompt, and the model maps findings to MITRE ATT&CK technique IDs
+
+The vector store is persisted at `data/chroma_db/` and re-indexes automatically when the technique count in `data/mitre_techniques.json` changes.
+
 ## Project Structure
 
 ```
 cloud-security-agent/
 ├── agent/
 │   ├── __init__.py
-│   ├── security_agent.py      # Main security analysis logic
-│   └── rules.py               # Security rules
+│   ├── security_agent.py      # LLM-based security analysis with RAG
+│   ├── rules.py               # Finding dataclass and prompt formatting
+│   └── vector_store.py        # ChromaDB vector store for MITRE techniques
+├── mcp_server/
+│   ├── mitre_attack_server.py # MCP server for MITRE ATT&CK data
+│   └── requirements.txt       # MCP server dependencies
+├── data/
+│   ├── mitre_techniques.json  # MITRE ATT&CK techniques (auto-populated)
+│   └── chroma_db/             # ChromaDB persistent storage (gitignored)
 ├── main.py                    # FastAPI application entry point
+├── .mcp.json                  # MCP server registration for Claude Code
 └── .env                       # Environment configuration
 ```
 

@@ -1,274 +1,1120 @@
 {
   "techniques": [
     {
-      "id": "T1078",
-      "name": "Valid Accounts",
-      "tactic": "Initial Access, Persistence, Privilege Escalation",
-      "platform": "AWS, Azure, GCP",
-      "description": "Adversaries may use valid accounts to gain initial access, persist, or escalate privileges. Overly permissive IAM policies and wildcard permissions enable abuse of legitimate credentials.",
-      "cloud_examples": "IAM policies with Action:*, wildcard Resource, broad assume-role trust policies, default service accounts with admin access",
-      "detection_patterns": "iam_policy, iam_role, assume_role, Action, *, AdministratorAccess, principal, aws_iam"
-    },
-    {
-      "id": "T1078.004",
-      "name": "Valid Accounts: Cloud Accounts",
-      "tactic": "Initial Access, Persistence",
-      "platform": "AWS, Azure, GCP",
-      "description": "Adversaries may use cloud accounts with excessive permissions. Shared credentials, long-lived access keys, and missing MFA enable unauthorized access.",
-      "cloud_examples": "IAM users without MFA, long-lived access keys, shared service account keys, root account usage",
-      "detection_patterns": "aws_iam_user, access_key, mfa, login_profile, google_service_account_key, azurerm_user"
-    },
-    {
-      "id": "T1530",
-      "name": "Data from Cloud Storage",
-      "tactic": "Collection",
-      "platform": "AWS, Azure, GCP",
-      "description": "Adversaries may access data from improperly secured cloud storage. Public buckets, missing encryption, and overly broad access policies expose sensitive data.",
-      "cloud_examples": "Public S3 buckets, public-read ACL, missing server-side encryption, open bucket policies, public Azure blob containers",
-      "detection_patterns": "aws_s3_bucket, acl, public-read, public, bucket_policy, encryption, server_side_encryption, azurerm_storage_account, google_storage_bucket"
-    },
-    {
-      "id": "T1537",
-      "name": "Transfer Data to Cloud Account",
+      "id": "T1020.001",
+      "name": "Traffic Duplication",
       "tactic": "Exfiltration",
-      "platform": "AWS, Azure, GCP",
-      "description": "Adversaries may transfer data to another cloud account they control. Cross-account access without restrictions and overly permissive sharing policies enable exfiltration.",
-      "cloud_examples": "S3 bucket policies allowing cross-account access, unrestricted AssumeRole from external accounts, shared snapshots",
-      "detection_patterns": "aws_s3_bucket_policy, cross_account, external_id, sts, assume_role, snapshot, ami, shared"
+      "platform": "IaaS",
+      "description": "Adversaries may leverage traffic mirroring in order to automate data exfiltration over compromised infrastructure. Traffic mirroring is a native feature for some devices, often used for network analysis. For example, devices may be configured to forward network traffic to one or more destinations for analysis by a network analyzer or other monitoring device. (Citation: Cisco Traffic Mirroring)(Citation: Juniper Traffic Mirroring)\n\nAdversaries may abuse traffic mirroring to mirror or redirect ...",
+      "cloud_examples": "",
+      "detection_patterns": ""
     },
     {
-      "id": "T1190",
-      "name": "Exploit Public-Facing Application",
-      "tactic": "Initial Access",
-      "platform": "AWS, Azure, GCP",
-      "description": "Adversaries exploit vulnerabilities in internet-facing services. Open security groups, public endpoints without authentication, and exposed management interfaces enable initial access.",
-      "cloud_examples": "Security groups with 0.0.0.0/0 ingress, public subnets without NACLs, exposed SSH/RDP ports, public load balancers without WAF",
-      "detection_patterns": "aws_security_group, ingress, 0.0.0.0/0, cidr_blocks, ::/0, from_port, to_port, publicly_accessible, azurerm_network_security_rule"
+      "id": "T1021",
+      "name": "Remote Services",
+      "tactic": "Lateral Movement",
+      "platform": "IaaS",
+      "description": "Adversaries may use [Valid Accounts](https://attack.mitre.org/techniques/T1078) to log into a service that accepts remote connections, such as telnet, SSH, and VNC. The adversary may then perform actions as the logged-on user.\n\nIn an enterprise environment, servers and workstations can be organized into domains. Domains provide centralized identity management, allowing users to login using one set of credentials across the entire network. If an adversary is able to obtain a set of valid domai...",
+      "cloud_examples": "",
+      "detection_patterns": ""
     },
     {
-      "id": "T1098",
-      "name": "Account Manipulation",
-      "tactic": "Persistence, Privilege Escalation",
-      "platform": "AWS, Azure, GCP",
-      "description": "Adversaries may manipulate accounts to maintain access or escalate privileges. Unrestricted role creation, inline admin policies, and overly broad permission boundaries enable persistence.",
-      "cloud_examples": "IAM policies allowing iam:*, unrestricted CreateRole/AttachPolicy, missing permission boundaries, inline admin policies",
-      "detection_patterns": "iam_policy, iam:*, CreateRole, AttachRolePolicy, PutRolePolicy, permissions_boundary, inline_policy"
+      "id": "T1021.007",
+      "name": "Cloud Services",
+      "tactic": "Lateral Movement",
+      "platform": "IaaS, SaaS",
+      "description": "Adversaries may log into accessible cloud services within a compromised environment using [Valid Accounts](https://attack.mitre.org/techniques/T1078) that are synchronized with or federated to on-premises user identities. The adversary may then perform management actions or access cloud-hosted resources as the logged-on user. \n\nMany enterprises federate centrally managed user identities to cloud services, allowing users to login with their domain credentials in order to access the cloud contr...",
+      "cloud_examples": "",
+      "detection_patterns": ""
     },
     {
-      "id": "T1562",
-      "name": "Impair Defenses",
+      "id": "T1021.008",
+      "name": "Direct Cloud VM Connections",
+      "tactic": "Lateral Movement",
+      "platform": "IaaS",
+      "description": "Adversaries may leverage [Valid Accounts](https://attack.mitre.org/techniques/T1078) to log directly into accessible cloud hosted compute infrastructure through cloud native methods. Many cloud providers offer interactive connections to virtual infrastructure that can be accessed through the [Cloud API](https://attack.mitre.org/techniques/T1059/009), such as Azure Serial Console(Citation: Azure Serial Console), AWS EC2 Instance Connect(Citation: EC2 Instance Connect)(Citation: lucr-3: Getting...",
+      "cloud_examples": "",
+      "detection_patterns": ""
+    },
+    {
+      "id": "T1036.010",
+      "name": "Masquerade Account Name",
       "tactic": "Defense Evasion",
-      "platform": "AWS, Azure, GCP",
-      "description": "Adversaries may disable or tamper with security monitoring. Disabled logging, removed CloudTrail, turned off GuardDuty, or suppressed alerts allow adversaries to operate undetected.",
-      "cloud_examples": "CloudTrail with logging disabled, S3 bucket logging off, GuardDuty disabled, VPC flow logs missing, disabled Azure Security Center",
-      "detection_patterns": "aws_cloudtrail, is_multi_region_trail, enable_logging, aws_guardduty, vpc_flow_log, logging, monitoring, azurerm_security_center"
+      "platform": "IaaS, SaaS",
+      "description": "Adversaries may match or approximate the names of legitimate accounts to make newly created ones appear benign. This will typically occur during [Create Account](https://attack.mitre.org/techniques/T1136), although accounts may also be renamed at a later date. This may also coincide with [Account Access Removal](https://attack.mitre.org/techniques/T1531) if the actor first deletes an account before re-creating one with the same name.(Citation: Huntress MOVEit 2023)\n\nOften, adversaries will at...",
+      "cloud_examples": "",
+      "detection_patterns": ""
     },
     {
-      "id": "T1562.008",
-      "name": "Impair Defenses: Disable Cloud Logs",
-      "tactic": "Defense Evasion",
-      "platform": "AWS, Azure, GCP",
-      "description": "Adversaries may disable cloud logging to avoid detection. Turning off CloudTrail, deleting log groups, or disabling access logging removes audit trails.",
-      "cloud_examples": "CloudTrail with enable_logging=false, missing S3 access logging, deleted CloudWatch log groups, disabled GCP audit logs",
-      "detection_patterns": "enable_logging, false, cloudtrail, cloudwatch_log_group, access_logging, audit_log_config"
+      "id": "T1040",
+      "name": "Network Sniffing",
+      "tactic": "Credential Access, Discovery",
+      "platform": "IaaS",
+      "description": "Adversaries may passively sniff network traffic to capture information about an environment, including authentication material passed over the network. Network sniffing refers to using the network interface on a system to monitor or capture information sent over a wired or wireless connection. An adversary may place a network interface into promiscuous mode to passively access data in transit over the network, or use span ports to capture a larger amount of data.\n\nData captured via this techn...",
+      "cloud_examples": "",
+      "detection_patterns": ""
     },
     {
-      "id": "T1580",
-      "name": "Cloud Infrastructure Discovery",
+      "id": "T1046",
+      "name": "Network Service Discovery",
       "tactic": "Discovery",
-      "platform": "AWS, Azure, GCP",
-      "description": "Adversaries may discover cloud infrastructure details. Exposed metadata endpoints, IMDSv1 usage, and overly broad describe/list permissions reveal infrastructure topology.",
-      "cloud_examples": "EC2 instances using IMDSv1 instead of IMDSv2, overly broad ec2:Describe* permissions, exposed metadata services",
-      "detection_patterns": "metadata_options, http_tokens, http_endpoint, IMDSv2, instance_metadata, ec2:Describe, http_put_response_hop_limit"
-    },
-    {
-      "id": "T1552",
-      "name": "Unsecured Credentials",
-      "tactic": "Credential Access",
-      "platform": "AWS, Azure, GCP",
-      "description": "Adversaries may search for unsecured credentials in cloud infrastructure code. Hardcoded secrets, API keys, passwords, and connection strings in plaintext enable credential theft.",
-      "cloud_examples": "Hardcoded AWS access keys in Terraform, passwords in user_data scripts, API keys in environment variables, plaintext secrets in config",
-      "detection_patterns": "access_key, secret_key, password, api_key, connection_string, user_data, AKIA, private_key, credentials"
-    },
-    {
-      "id": "T1552.005",
-      "name": "Unsecured Credentials: Cloud Instance Metadata API",
-      "tactic": "Credential Access",
-      "platform": "AWS, Azure, GCP",
-      "description": "Adversaries may access the cloud instance metadata API to collect credentials. IMDSv1 allows unauthenticated access to instance credentials via HTTP.",
-      "cloud_examples": "EC2 instances without IMDSv2 enforcement, missing http_tokens=required, metadata endpoint exposed to containers",
-      "detection_patterns": "metadata_options, http_tokens, optional, required, http_endpoint, instance_metadata_tags"
+      "platform": "IaaS",
+      "description": "Adversaries may attempt to get a listing of services running on remote hosts and local network infrastructure devices, including those that may be vulnerable to remote software exploitation. Common methods to acquire this information include port, vulnerability, and/or wordlist scans using tools that are brought onto a system.(Citation: CISA AR21-126A FIVEHANDS May 2021)   \n\nWithin cloud environments, adversaries may attempt to discover services running on other cloud hosts. Additionally, if ...",
+      "cloud_examples": "",
+      "detection_patterns": ""
     },
     {
       "id": "T1048",
       "name": "Exfiltration Over Alternative Protocol",
       "tactic": "Exfiltration",
-      "platform": "AWS, Azure, GCP",
-      "description": "Adversaries may exfiltrate data using non-standard protocols. Unrestricted egress rules, open outbound ports, and missing network ACLs enable data exfiltration.",
-      "cloud_examples": "Security groups with unrestricted egress (0.0.0.0/0 on all ports), missing outbound NACLs, no VPC endpoints for S3",
-      "detection_patterns": "egress, outbound, 0.0.0.0/0, all, nacl, network_acl, vpc_endpoint, aws_security_group_rule"
+      "platform": "IaaS, SaaS",
+      "description": "Adversaries may steal data by exfiltrating it over a different protocol than that of the existing command and control channel. The data may also be sent to an alternate network location from the main command and control server.  \n\nAlternate protocols include FTP, SMTP, HTTP/S, DNS, SMB, or any other network protocol not being used as the main command and control channel. Adversaries may also opt to encrypt and/or obfuscate these alternate channels. \n\n[Exfiltration Over Alternative Protocol](h...",
+      "cloud_examples": "",
+      "detection_patterns": ""
     },
     {
-      "id": "T1496",
-      "name": "Resource Hijacking",
-      "tactic": "Impact",
-      "platform": "AWS, Azure, GCP",
-      "description": "Adversaries may hijack cloud resources for cryptomining or other purposes. Missing resource constraints, no budget alerts, and unbounded instance types enable resource abuse.",
-      "cloud_examples": "No AWS budget alerts, unbounded auto-scaling groups, large instance types without justification, missing resource quotas",
-      "detection_patterns": "aws_budgets_budget, autoscaling_group, max_size, instance_type, quota, budget, cost"
+      "id": "T1049",
+      "name": "System Network Connections Discovery",
+      "tactic": "Discovery",
+      "platform": "IaaS",
+      "description": "Adversaries may attempt to get a listing of network connections to or from the compromised system they are currently accessing or from remote systems by querying for information over the network. \n\nAn adversary who gains access to a system that is part of a cloud-based environment may map out Virtual Private Clouds or Virtual Networks in order to determine what systems and services are connected. The actions performed are likely the same types of discovery techniques depending on the operatin...",
+      "cloud_examples": "",
+      "detection_patterns": ""
+    },
+    {
+      "id": "T1059",
+      "name": "Command and Scripting Interpreter",
+      "tactic": "Execution",
+      "platform": "IaaS",
+      "description": "Adversaries may abuse command and script interpreters to execute commands, scripts, or binaries. These interfaces and languages provide ways of interacting with computer systems and are a common feature across many different platforms. Most systems come with some built-in command-line interface and scripting capabilities, for example, macOS and Linux distributions include some flavor of [Unix Shell](https://attack.mitre.org/techniques/T1059/004) while Windows installations include the [Window...",
+      "cloud_examples": "",
+      "detection_patterns": ""
+    },
+    {
+      "id": "T1059.009",
+      "name": "Cloud API",
+      "tactic": "Execution",
+      "platform": "IaaS, SaaS",
+      "description": "Adversaries may abuse cloud APIs to execute malicious commands. APIs available in cloud environments provide various functionalities and are a feature-rich method for programmatic access to nearly all aspects of a tenant. These APIs may be utilized through various methods such as command line interpreters (CLIs), in-browser Cloud Shells, [PowerShell](https://attack.mitre.org/techniques/T1059/001) modules like Azure for PowerShell(Citation: Microsoft - Azure PowerShell), or software developer ...",
+      "cloud_examples": "",
+      "detection_patterns": ""
+    },
+    {
+      "id": "T1069",
+      "name": "Permission Groups Discovery",
+      "tactic": "Discovery",
+      "platform": "IaaS, SaaS",
+      "description": "Adversaries may attempt to discover group and permission settings. This information can help adversaries determine which user accounts and groups are available, the membership of users in particular groups, and which users and groups have elevated permissions.\n\nAdversaries may attempt to discover group permission settings in many different ways. This data may provide the adversary with information about the compromised environment that can be used in follow-on activity and targeting.(Citation...",
+      "cloud_examples": "",
+      "detection_patterns": ""
+    },
+    {
+      "id": "T1069.003",
+      "name": "Cloud Groups",
+      "tactic": "Discovery",
+      "platform": "IaaS, SaaS",
+      "description": "Adversaries may attempt to find cloud groups and permission settings. The knowledge of cloud permission groups can help adversaries determine the particular roles of users and groups within an environment, as well as which users are associated with a particular group.\n\nWith authenticated access there are several tools that can be used to find permissions groups. The <code>Get-MsolRole</code> PowerShell cmdlet can be used to obtain roles and permissions groups for Exchange and Office 365 accou...",
+      "cloud_examples": "",
+      "detection_patterns": ""
+    },
+    {
+      "id": "T1072",
+      "name": "Software Deployment Tools",
+      "tactic": "Execution, Lateral Movement",
+      "platform": "SaaS",
+      "description": "Adversaries may gain access to and use centralized software suites installed within an enterprise to execute commands and move laterally through the network. Configuration management and software deployment applications may be used in an enterprise network or cloud environment for routine administration purposes. These systems may also be integrated into CI/CD pipelines. Examples of such solutions include: SCCM, HBSS, Altiris, AWS Systems Manager, Microsoft Intune, Azure Arc, and GCP Deployme...",
+      "cloud_examples": "",
+      "detection_patterns": ""
+    },
+    {
+      "id": "T1074",
+      "name": "Data Staged",
+      "tactic": "Collection",
+      "platform": "IaaS",
+      "description": "Adversaries may stage collected data in a central location or directory prior to Exfiltration. Data may be kept in separate files or combined into one file through techniques such as [Archive Collected Data](https://attack.mitre.org/techniques/T1560). Interactive command shells may be used, and common functionality within [cmd](https://attack.mitre.org/software/S0106) and bash may be used to copy data into a staging location.(Citation: PWC Cloud Hopper April 2017)\n\nIn cloud environments, adve...",
+      "cloud_examples": "",
+      "detection_patterns": ""
+    },
+    {
+      "id": "T1074.002",
+      "name": "Remote Data Staging",
+      "tactic": "Collection",
+      "platform": "IaaS",
+      "description": "Adversaries may stage data collected from multiple systems in a central location or directory on one system prior to Exfiltration. Data may be kept in separate files or combined into one file through techniques such as [Archive Collected Data](https://attack.mitre.org/techniques/T1560). Interactive command shells may be used, and common functionality within [cmd](https://attack.mitre.org/software/S0106) and bash may be used to copy data into a staging location.\n\nIn cloud environments, adversa...",
+      "cloud_examples": "",
+      "detection_patterns": ""
+    },
+    {
+      "id": "T1078",
+      "name": "Valid Accounts",
+      "tactic": "Defense Evasion, Persistence, Privilege Escalation, Initial Access",
+      "platform": "IaaS, SaaS",
+      "description": "Adversaries may obtain and abuse credentials of existing accounts as a means of gaining Initial Access, Persistence, Privilege Escalation, or Defense Evasion. Compromised credentials may be used to bypass access controls placed on various resources on systems within the network and may even be used for persistent access to remote systems and externally available services, such as VPNs, Outlook Web Access, network devices, and remote desktop.(Citation: volexity_0day_sophos_FW) Compromised cred...",
+      "cloud_examples": "",
+      "detection_patterns": ""
+    },
+    {
+      "id": "T1078.001",
+      "name": "Default Accounts",
+      "tactic": "Defense Evasion, Persistence, Privilege Escalation, Initial Access",
+      "platform": "IaaS, SaaS",
+      "description": "Adversaries may obtain and abuse credentials of a default account as a means of gaining Initial Access, Persistence, Privilege Escalation, or Defense Evasion. Default accounts are those that are built-into an OS, such as the Guest or Administrator accounts on Windows systems. Default accounts also include default factory/provider set accounts on other types of systems, software, or devices, including the root user account in AWS, the root user account in ESXi, and the default service account ...",
+      "cloud_examples": "",
+      "detection_patterns": ""
+    },
+    {
+      "id": "T1078.004",
+      "name": "Cloud Accounts",
+      "tactic": "Defense Evasion, Persistence, Privilege Escalation, Initial Access",
+      "platform": "IaaS, SaaS",
+      "description": "Valid accounts in cloud environments may allow adversaries to perform actions to achieve Initial Access, Persistence, Privilege Escalation, or Defense Evasion. Cloud accounts are those created and configured by an organization for use by users, remote support, services, or for administration of resources within a cloud service provider or SaaS application. Cloud Accounts can exist solely in the cloud; alternatively, they may be hybrid-joined between on-premises systems and the cloud through s...",
+      "cloud_examples": "",
+      "detection_patterns": ""
+    },
+    {
+      "id": "T1080",
+      "name": "Taint Shared Content",
+      "tactic": "Lateral Movement",
+      "platform": "SaaS",
+      "description": "\nAdversaries may deliver payloads to remote systems by adding content to shared storage locations, such as network drives or internal code repositories. Content stored on network drives or in other shared locations may be tainted by adding malicious programs, scripts, or exploit code to otherwise valid files. Once a user opens the shared tainted content, the malicious portion can be executed to run the adversary's code on a remote system. Adversaries may use tainted shared content to move lat...",
+      "cloud_examples": "",
+      "detection_patterns": ""
+    },
+    {
+      "id": "T1082",
+      "name": "System Information Discovery",
+      "tactic": "Discovery",
+      "platform": "IaaS",
+      "description": "An adversary may attempt to get detailed information about the operating system and hardware, including version, patches, hotfixes, service packs, and architecture. Adversaries may use this information to shape follow-on behaviors, including whether or not the adversary fully infects the target and/or attempts specific actions. This behavior is distinct from [Local Storage Discovery](https://attack.mitre.org/techniques/T1680) which is an adversary's discovery of local drive, disks and/or volu...",
+      "cloud_examples": "",
+      "detection_patterns": ""
+    },
+    {
+      "id": "T1087",
+      "name": "Account Discovery",
+      "tactic": "Discovery",
+      "platform": "IaaS, SaaS",
+      "description": "Adversaries may attempt to get a listing of valid accounts, usernames, or email addresses on a system or within a compromised environment. This information can help adversaries determine which accounts exist, which can aid in follow-on behavior such as brute-forcing, spear-phishing attacks, or account takeovers (e.g., [Valid Accounts](https://attack.mitre.org/techniques/T1078)).\n\nAdversaries may use several methods to enumerate accounts, including abuse of existing tools, built-in commands, a...",
+      "cloud_examples": "",
+      "detection_patterns": ""
+    },
+    {
+      "id": "T1087.004",
+      "name": "Cloud Account",
+      "tactic": "Discovery",
+      "platform": "IaaS, SaaS",
+      "description": "Adversaries may attempt to get a listing of cloud accounts. Cloud accounts are those created and configured by an organization for use by users, remote support, services, or for administration of resources within a cloud service provider or SaaS application.\n\nWith authenticated access there are several tools that can be used to find accounts. The <code>Get-MsolRoleMember</code> PowerShell cmdlet can be used to obtain account names given a role or permissions group in Office 365.(Citation: Mic...",
+      "cloud_examples": "",
+      "detection_patterns": ""
+    },
+    {
+      "id": "T1098",
+      "name": "Account Manipulation",
+      "tactic": "Persistence, Privilege Escalation",
+      "platform": "IaaS, SaaS",
+      "description": "Adversaries may manipulate accounts to maintain and/or elevate access to victim systems. Account manipulation may consist of any action that preserves or modifies adversary access to a compromised account, such as modifying credentials or permission groups.(Citation: FireEye SMOKEDHAM June 2021) These actions could also include account activity designed to subvert security policies, such as performing iterative password updates to bypass password duration policies and preserve the life of com...",
+      "cloud_examples": "",
+      "detection_patterns": ""
+    },
+    {
+      "id": "T1098.001",
+      "name": "Additional Cloud Credentials",
+      "tactic": "Persistence, Privilege Escalation",
+      "platform": "IaaS, SaaS",
+      "description": "Adversaries may add adversary-controlled credentials to a cloud account to maintain persistent access to victim accounts and instances within the environment.\n\nFor example, adversaries may add credentials for Service Principals and Applications in addition to existing legitimate credentials in Azure / Entra ID.(Citation: Microsoft SolarWinds Customer Guidance)(Citation: Blue Cloud of Death)(Citation: Blue Cloud of Death Video) These credentials include both x509 keys and passwords.(Citation: ...",
+      "cloud_examples": "",
+      "detection_patterns": ""
+    },
+    {
+      "id": "T1098.003",
+      "name": "Additional Cloud Roles",
+      "tactic": "Persistence, Privilege Escalation",
+      "platform": "IaaS, SaaS",
+      "description": "An adversary may add additional roles or permissions to an adversary-controlled cloud account to maintain persistent access to a tenant. For example, adversaries may update IAM policies in cloud-based environments or add a new global administrator in Office 365 environments.(Citation: AWS IAM Policies and Permissions)(Citation: Google Cloud IAM Policies)(Citation: Microsoft Support O365 Add Another Admin, October 2019)(Citation: Microsoft O365 Admin Roles) With sufficient permissions, a compr...",
+      "cloud_examples": "",
+      "detection_patterns": ""
+    },
+    {
+      "id": "T1098.004",
+      "name": "SSH Authorized Keys",
+      "tactic": "Persistence, Privilege Escalation",
+      "platform": "IaaS",
+      "description": "Adversaries may modify the SSH <code>authorized_keys</code> file to maintain persistence on a victim host. Linux distributions, macOS, and ESXi hypervisors commonly use key-based authentication to secure the authentication process of SSH sessions for remote management. The <code>authorized_keys</code> file in SSH specifies the SSH keys that can be used for logging into the user account for which the file is configured. This file is usually found in the user's home directory under <code>&lt;us...",
+      "cloud_examples": "",
+      "detection_patterns": ""
     },
     {
       "id": "T1110",
       "name": "Brute Force",
       "tactic": "Credential Access",
-      "platform": "AWS, Azure, GCP",
-      "description": "Adversaries may use brute force to obtain credentials. Missing account lockout policies, weak password requirements, and exposed authentication endpoints enable brute force attacks.",
-      "cloud_examples": "IAM password policy with short minimum length, no account lockout, Cognito without MFA, exposed RDS/database ports",
-      "detection_patterns": "aws_iam_account_password_policy, minimum_password_length, max_password_age, require_uppercase, cognito, password_policy"
+      "platform": "IaaS, SaaS",
+      "description": "Adversaries may use brute force techniques to gain access to accounts when passwords are unknown or when password hashes are obtained.(Citation: TrendMicro Pawn Storm Dec 2020) Without knowledge of the password for an account or set of accounts, an adversary may systematically guess the password using a repetitive or iterative mechanism.(Citation: Dragos Crashoverride 2018) Brute forcing passwords can take place via interaction with a service that will check the validity of those credentials ...",
+      "cloud_examples": "",
+      "detection_patterns": ""
+    },
+    {
+      "id": "T1110.001",
+      "name": "Password Guessing",
+      "tactic": "Credential Access",
+      "platform": "IaaS, SaaS",
+      "description": "Adversaries with no prior knowledge of legitimate credentials within the system or environment may guess passwords to attempt access to accounts. Without knowledge of the password for an account, an adversary may opt to systematically guess the password using a repetitive or iterative mechanism. An adversary may guess login credentials without prior knowledge of system or environment passwords during an operation by using a list of common passwords. Password guessing may or may not take into ...",
+      "cloud_examples": "",
+      "detection_patterns": ""
+    },
+    {
+      "id": "T1110.003",
+      "name": "Password Spraying",
+      "tactic": "Credential Access",
+      "platform": "IaaS, SaaS",
+      "description": "Adversaries may use a single or small list of commonly used passwords against many different accounts to attempt to acquire valid account credentials. Password spraying uses one password (e.g. 'Password01'), or a small list of commonly used passwords, that may match the complexity policy of the domain. Logins are attempted with that password against many different accounts on a network to avoid account lockouts that would normally occur when brute forcing a single account with many passwords....",
+      "cloud_examples": "",
+      "detection_patterns": ""
+    },
+    {
+      "id": "T1110.004",
+      "name": "Credential Stuffing",
+      "tactic": "Credential Access",
+      "platform": "IaaS, SaaS",
+      "description": "Adversaries may use credentials obtained from breach dumps of unrelated accounts to gain access to target accounts through credential overlap. Occasionally, large numbers of username and password pairs are dumped online when a website or service is compromised and the user account credentials accessed. The information may be useful to an adversary attempting to compromise accounts by taking advantage of the tendency for users to use the same passwords across personal and business accounts.\n\nC...",
+      "cloud_examples": "",
+      "detection_patterns": ""
+    },
+    {
+      "id": "T1119",
+      "name": "Automated Collection",
+      "tactic": "Collection",
+      "platform": "IaaS, SaaS",
+      "description": "Once established within a system or network, an adversary may use automated techniques for collecting internal data. Methods for performing this technique could include use of a [Command and Scripting Interpreter](https://attack.mitre.org/techniques/T1059) to search for and copy information fitting set criteria such as file type, location, or name at specific time intervals. \n\nIn cloud-based environments, adversaries may also use cloud APIs, data pipelines, command line interfaces, or extract...",
+      "cloud_examples": "",
+      "detection_patterns": ""
+    },
+    {
+      "id": "T1136",
+      "name": "Create Account",
+      "tactic": "Persistence",
+      "platform": "IaaS, SaaS",
+      "description": "Adversaries may create an account to maintain access to victim systems.(Citation: Symantec WastedLocker June 2020) With a sufficient level of access, creating such accounts may be used to establish secondary credentialed access that do not require persistent remote access tools to be deployed on the system.\n\nAccounts may be created on the local system or within a domain or cloud tenant. In cloud environments, adversaries may create accounts that only have access to specific services, which ca...",
+      "cloud_examples": "",
+      "detection_patterns": ""
     },
     {
       "id": "T1136.003",
-      "name": "Create Account: Cloud Account",
+      "name": "Cloud Account",
       "tactic": "Persistence",
-      "platform": "AWS, Azure, GCP",
-      "description": "Adversaries may create cloud accounts to maintain persistence. Unrestricted ability to create IAM users or service accounts enables backdoor access.",
-      "cloud_examples": "IAM policies allowing iam:CreateUser without conditions, service account creation without org policy constraints",
-      "detection_patterns": "iam:CreateUser, iam:CreateAccessKey, CreateServiceAccount, create_user, aws_iam_user"
+      "platform": "IaaS, SaaS",
+      "description": "Adversaries may create a cloud account to maintain access to victim systems. With a sufficient level of access, such accounts may be used to establish secondary credentialed access that does not require persistent remote access tools to be deployed on the system.(Citation: Microsoft O365 Admin Roles)(Citation: Microsoft Support O365 Add Another Admin, October 2019)(Citation: AWS Create IAM User)(Citation: GCP Create Cloud Identity Users)(Citation: Microsoft Azure AD Users)\n\nIn addition to use...",
+      "cloud_examples": "",
+      "detection_patterns": ""
     },
     {
-      "id": "T1525",
-      "name": "Implant Internal Image",
-      "tactic": "Persistence",
-      "platform": "AWS, Azure, GCP",
-      "description": "Adversaries may implant backdoors in cloud images. Public AMIs, unverified container images, and registries without scanning enable supply chain attacks.",
-      "cloud_examples": "Public AMIs used without verification, ECR without image scanning, Docker images from untrusted registries",
-      "detection_patterns": "aws_ami, image_id, ecr, image_scanning_configuration, scan_on_push, container_registry, docker"
+      "id": "T1190",
+      "name": "Exploit Public-Facing Application",
+      "tactic": "Initial Access",
+      "platform": "IaaS",
+      "description": "Adversaries may attempt to exploit a weakness in an Internet-facing host or system to initially access a network. The weakness in the system can be a software bug, a temporary glitch, or a misconfiguration.\n\nExploited applications are often websites/web servers, but can also include databases (like SQL), standard services (like SMB or SSH), network device administration and management protocols (like SNMP and Smart Install), and any other system with Internet-accessible open sockets.(Citation...",
+      "cloud_examples": "",
+      "detection_patterns": ""
     },
     {
-      "id": "T1556",
-      "name": "Modify Authentication Process",
-      "tactic": "Credential Access, Defense Evasion, Persistence",
-      "platform": "AWS, Azure, GCP",
-      "description": "Adversaries may modify authentication mechanisms. Custom identity providers, modified federation settings, or weakened auth requirements enable unauthorized access.",
-      "cloud_examples": "SAML/OIDC providers with weak validation, Cognito with no MFA, modified IAM identity providers, weakened conditional access",
-      "detection_patterns": "aws_iam_saml_provider, aws_iam_openid_connect_provider, cognito_user_pool, mfa_configuration, identity_provider"
+      "id": "T1195",
+      "name": "Supply Chain Compromise",
+      "tactic": "Initial Access",
+      "platform": "SaaS",
+      "description": "Adversaries may manipulate products or product delivery mechanisms prior to receipt by a final consumer for the purpose of data or system compromise.\n\nSupply chain compromise can take place at any stage of the supply chain including:\n\n* Manipulation of development tools\n* Manipulation of a development environment\n* Manipulation of source code repositories (public or private)\n* Manipulation of source code in open-source dependencies\n* Manipulation of software update/distribution mechanisms\n* C...",
+      "cloud_examples": "",
+      "detection_patterns": ""
     },
     {
-      "id": "T1578",
-      "name": "Modify Cloud Compute Infrastructure",
+      "id": "T1199",
+      "name": "Trusted Relationship",
+      "tactic": "Initial Access",
+      "platform": "IaaS, SaaS",
+      "description": "Adversaries may breach or otherwise leverage organizations who have access to intended victims. Access through trusted third party relationship abuses an existing connection that may not be protected or receives less scrutiny than standard mechanisms of gaining access to a network.\n\nOrganizations often grant elevated access to second or third-party external providers in order to allow them to manage internal systems as well as cloud-based environments. Some examples of these relationships inc...",
+      "cloud_examples": "",
+      "detection_patterns": ""
+    },
+    {
+      "id": "T1201",
+      "name": "Password Policy Discovery",
+      "tactic": "Discovery",
+      "platform": "IaaS, SaaS",
+      "description": "Adversaries may attempt to access detailed information about the password policy used within an enterprise network or cloud environment. Password policies are a way to enforce complex passwords that are difficult to guess or crack through [Brute Force](https://attack.mitre.org/techniques/T1110). This information may help the adversary to create a list of common passwords and launch dictionary and/or brute force attacks which adheres to the policy (e.g. if the minimum password length should be...",
+      "cloud_examples": "",
+      "detection_patterns": ""
+    },
+    {
+      "id": "T1204",
+      "name": "User Execution",
+      "tactic": "Execution",
+      "platform": "IaaS",
+      "description": "An adversary may rely upon specific actions by a user in order to gain execution. Users may be subjected to social engineering to get them to execute malicious code by, for example, opening a malicious document file or link. These user actions will typically be observed as follow-on behavior from forms of [Phishing](https://attack.mitre.org/techniques/T1566).\n\nWhile [User Execution](https://attack.mitre.org/techniques/T1204) frequently occurs shortly after Initial Access it may occur at other...",
+      "cloud_examples": "",
+      "detection_patterns": ""
+    },
+    {
+      "id": "T1204.003",
+      "name": "Malicious Image",
+      "tactic": "Execution",
+      "platform": "IaaS",
+      "description": "Adversaries may rely on a user running a malicious image to facilitate execution. Amazon Web Services (AWS) Amazon Machine Images (AMIs), Google Cloud Platform (GCP) Images, and Azure Images as well as popular container runtimes such as Docker can be backdoored. Backdoored images may be uploaded to a public repository via [Upload Malware](https://attack.mitre.org/techniques/T1608/001), and users may then download and deploy an instance or container from the image without realizing the image i...",
+      "cloud_examples": "",
+      "detection_patterns": ""
+    },
+    {
+      "id": "T1211",
+      "name": "Exploitation for Defense Evasion",
       "tactic": "Defense Evasion",
-      "platform": "AWS, Azure, GCP",
-      "description": "Adversaries may modify cloud compute infrastructure to evade detection. Creating snapshots, modifying instances, or changing security groups can bypass controls.",
-      "cloud_examples": "Unrestricted EC2 modify/run permissions, ability to create snapshots of any volume, unrestricted security group modification",
-      "detection_patterns": "ec2:ModifyInstanceAttribute, ec2:RunInstances, ec2:CreateSnapshot, modify_instance, create_snapshot"
+      "platform": "IaaS, SaaS",
+      "description": "Adversaries may exploit a system or application vulnerability to bypass security features. Exploitation of a vulnerability occurs when an adversary takes advantage of a programming error in a program, service, or within the operating system software or kernel itself to execute adversary-controlled code.\u00a0Vulnerabilities may exist in defensive security software that can be used to disable or circumvent them.\n\nAdversaries may have prior knowledge through reconnaissance that security software exi...",
+      "cloud_examples": "",
+      "detection_patterns": ""
     },
     {
-      "id": "T1610",
-      "name": "Deploy Container",
-      "tactic": "Defense Evasion, Execution",
-      "platform": "AWS, Azure, GCP",
-      "description": "Adversaries may deploy containers to execute malicious code. Privileged containers, host network access, and missing pod security policies enable container breakout.",
-      "cloud_examples": "Privileged containers in ECS/EKS, host network mode, missing pod security standards, containers running as root",
-      "detection_patterns": "privileged, host_network, security_context, run_as_root, pod_security, ecs_task_definition, eks, container_definitions"
+      "id": "T1213",
+      "name": "Data from Information Repositories",
+      "tactic": "Collection",
+      "platform": "IaaS, SaaS",
+      "description": "Adversaries may leverage information repositories to mine valuable information. Information repositories are tools that allow for storage of information, typically to facilitate collaboration or information sharing between users, and can store a wide variety of data that may aid adversaries in further objectives, such as Credential Access, Lateral Movement, or Defense Evasion, or direct access to the target information. Adversaries may also abuse external sharing features to share sensitive d...",
+      "cloud_examples": "",
+      "detection_patterns": ""
     },
     {
-      "id": "T1611",
-      "name": "Escape to Host",
-      "tactic": "Privilege Escalation",
-      "platform": "AWS, Azure, GCP",
-      "description": "Adversaries may escape container isolation to access the host. Privileged mode, host path mounts, and capability additions enable container escape.",
-      "cloud_examples": "Docker containers with --privileged, host volume mounts, added Linux capabilities (SYS_ADMIN), missing seccomp profiles",
-      "detection_patterns": "privileged, host_path, volume_mount, capabilities, SYS_ADMIN, seccomp, AppArmor, security_context"
+      "id": "T1213.001",
+      "name": "Confluence",
+      "tactic": "Collection",
+      "platform": "SaaS",
+      "description": "\nAdversaries may leverage Confluence repositories to mine valuable information. Often found in development environments alongside Atlassian JIRA, Confluence is generally used to store development-related documentation, however, in general may contain more diverse categories of useful information, such as:\n\n* Policies, procedures, and standards\n* Physical / logical network diagrams\n* System architecture diagrams\n* Technical system documentation\n* Testing / development credentials (i.e., [Unsec...",
+      "cloud_examples": "",
+      "detection_patterns": ""
     },
     {
-      "id": "T1613",
-      "name": "Container and Resource Discovery",
-      "tactic": "Discovery",
-      "platform": "AWS, Azure, GCP",
-      "description": "Adversaries may discover containers and cloud resources. Overly broad list/describe permissions on ECS, EKS, or other container services reveal infrastructure.",
-      "cloud_examples": "Broad ecs:List*/Describe* permissions, exposed Kubernetes API server, public container registry",
-      "detection_patterns": "ecs:List, ecs:Describe, eks:List, eks:Describe, kubernetes, api_server, container_registry, ecr"
+      "id": "T1213.003",
+      "name": "Code Repositories",
+      "tactic": "Collection",
+      "platform": "SaaS",
+      "description": "Adversaries may leverage code repositories to collect valuable information. Code repositories are tools/services that store source code and automate software builds. They may be hosted internally or privately on third party sites such as Github, GitLab, SourceForge, and BitBucket. Users typically interact with code repositories through a web application or command-line utilities such as git.\n\nOnce adversaries gain access to a victim network or a private code repository, they may collect sensi...",
+      "cloud_examples": "",
+      "detection_patterns": ""
     },
     {
-      "id": "T1619",
-      "name": "Cloud Storage Object Discovery",
-      "tactic": "Discovery",
-      "platform": "AWS, Azure, GCP",
-      "description": "Adversaries may enumerate cloud storage objects. Broad s3:List* permissions and bucket policies without conditions enable storage enumeration.",
-      "cloud_examples": "IAM policies with s3:ListBucket on *, public bucket listing enabled, storage account with public blob enumeration",
-      "detection_patterns": "s3:ListBucket, s3:GetObject, list_objects, public_access, blob_public_access, storage_account"
+      "id": "T1213.004",
+      "name": "Customer Relationship Management Software",
+      "tactic": "Collection",
+      "platform": "SaaS",
+      "description": "Adversaries may leverage Customer Relationship Management (CRM) software to mine valuable information. CRM software is used to assist organizations in tracking and managing customer interactions, as well as storing customer data.\n\nOnce adversaries gain access to a victim organization, they may mine CRM software for customer data. This may include personally identifiable information (PII) such as full names, emails, phone numbers, and addresses, as well as additional details such as purchase h...",
+      "cloud_examples": "",
+      "detection_patterns": ""
+    },
+    {
+      "id": "T1213.005",
+      "name": "Messaging Applications",
+      "tactic": "Collection",
+      "platform": "SaaS",
+      "description": "Adversaries may leverage chat and messaging applications, such as Microsoft Teams, Google Chat, and Slack, to mine valuable information.  \n\nThe following is a brief list of example information that may hold potential value to an adversary and may also be found on messaging applications: \n\n* Testing / development credentials (i.e., [Chat Messages](https://attack.mitre.org/techniques/T1552/008)) \n* Source code snippets \n* Links to network shares and other internal resources \n* Proprietary data(...",
+      "cloud_examples": "",
+      "detection_patterns": ""
+    },
+    {
+      "id": "T1213.006",
+      "name": "Databases",
+      "tactic": "Collection",
+      "platform": "IaaS, SaaS",
+      "description": "Adversaries may leverage databases to mine valuable information. These databases may be hosted on-premises or in the cloud (both in platform-as-a-service and software-as-a-service environments). \n\nExamples of databases from which information may be collected include MySQL, PostgreSQL, MongoDB, Amazon Relational Database Service, Azure SQL Database, Google Firebase, and Snowflake. Databases may include a variety of information of interest to adversaries, such as usernames, hashed passwords, pe...",
+      "cloud_examples": "",
+      "detection_patterns": ""
     },
     {
       "id": "T1485",
       "name": "Data Destruction",
       "tactic": "Impact",
-      "platform": "AWS, Azure, GCP",
-      "description": "Adversaries may destroy cloud data. Missing deletion protection, no versioning on S3 buckets, and unrestricted delete permissions enable permanent data loss.",
-      "cloud_examples": "S3 buckets without versioning, RDS without deletion protection, DynamoDB without PITR, missing backup policies",
-      "detection_patterns": "versioning, deletion_protection, backup, point_in_time_recovery, lifecycle, mfa_delete, prevent_destroy"
+      "platform": "IaaS",
+      "description": "Adversaries may destroy data and files on specific systems or in large numbers on a network to interrupt availability to systems, services, and network resources. Data destruction is likely to render stored data irrecoverable by forensic techniques through overwriting files or data on local and remote drives.(Citation: Symantec Shamoon 2012)(Citation: FireEye Shamoon Nov 2016)(Citation: Palo Alto Shamoon Nov 2016)(Citation: Kaspersky StoneDrill 2017)(Citation: Unit 42 Shamoon3 2018)(Citation:...",
+      "cloud_examples": "",
+      "detection_patterns": ""
+    },
+    {
+      "id": "T1485.001",
+      "name": "Lifecycle-Triggered Deletion",
+      "tactic": "Impact",
+      "platform": "IaaS",
+      "description": "Adversaries may modify the lifecycle policies of a cloud storage bucket to destroy all objects stored within.  \n\nCloud storage buckets often allow users to set lifecycle policies to automate the migration, archival, or deletion of objects after a set period of time.(Citation: AWS Storage Lifecycles)(Citation: GCP Storage Lifecycles)(Citation: Azure Storage Lifecycles) If a threat actor has sufficient permissions to modify these policies, they may be able to delete all objects at once. \n\nFor e...",
+      "cloud_examples": "",
+      "detection_patterns": ""
     },
     {
       "id": "T1486",
       "name": "Data Encrypted for Impact",
       "tactic": "Impact",
-      "platform": "AWS, Azure, GCP",
-      "description": "Adversaries may encrypt data for ransom. Unrestricted KMS key usage, missing key rotation, and broad encryption/decryption permissions enable ransomware attacks.",
-      "cloud_examples": "KMS keys without rotation, broad kms:Encrypt/Decrypt permissions, customer-managed keys accessible to external accounts",
-      "detection_patterns": "aws_kms_key, enable_key_rotation, kms:Encrypt, kms:Decrypt, key_policy, key_rotation"
-    },
-    {
-      "id": "T1499",
-      "name": "Endpoint Denial of Service",
-      "tactic": "Impact",
-      "platform": "AWS, Azure, GCP",
-      "description": "Adversaries may perform denial of service attacks on cloud endpoints. Missing rate limiting, no WAF, and exposed APIs without throttling enable service disruption.",
-      "cloud_examples": "API Gateway without throttling, CloudFront without WAF, ALB without rate limiting, missing DDoS protection (Shield)",
-      "detection_patterns": "aws_api_gateway, throttling, waf, aws_wafv2, shield, rate_limit, cloudfront, api_gateway_method_settings"
-    },
-    {
-      "id": "T1021.004",
-      "name": "Remote Services: SSH",
-      "tactic": "Lateral Movement",
-      "platform": "AWS, Azure, GCP",
-      "description": "Adversaries may use SSH for lateral movement. Open SSH ports to the internet, key-based auth without restrictions, and missing bastion hosts enable unauthorized remote access.",
-      "cloud_examples": "Security groups with port 22 open to 0.0.0.0/0, EC2 instances with public IPs and open SSH, missing bastion/jump hosts",
-      "detection_patterns": "port, 22, ssh, 0.0.0.0/0, bastion, key_name, associate_public_ip_address"
-    },
-    {
-      "id": "T1550.001",
-      "name": "Use Alternate Authentication Material: Application Access Token",
-      "tactic": "Defense Evasion, Lateral Movement",
-      "platform": "AWS, Azure, GCP",
-      "description": "Adversaries may use stolen application access tokens. Long-lived tokens, missing token rotation, and broadly scoped OAuth grants enable unauthorized API access.",
-      "cloud_examples": "Lambda functions with broad execution roles, API keys without expiration, OAuth scopes without least privilege",
-      "detection_patterns": "lambda, execution_role, api_key, token, oauth, scope, expiration, rotation"
-    },
-    {
-      "id": "T1538",
-      "name": "Cloud Service Dashboard",
-      "tactic": "Discovery",
-      "platform": "AWS, Azure, GCP",
-      "description": "Adversaries may use cloud dashboards to discover resources. Console access without IP restrictions and missing session policies enable reconnaissance via the management console.",
-      "cloud_examples": "IAM users with console access but no IP restriction, missing session duration limits, no conditional access policies",
-      "detection_patterns": "console_access, login_profile, session_duration, ip_restriction, condition, source_ip, aws:SourceIp"
-    },
-    {
-      "id": "T1583.006",
-      "name": "Acquire Infrastructure: Web Services",
-      "tactic": "Resource Development",
-      "platform": "AWS, Azure, GCP",
-      "description": "Adversaries may use web services for C2 or staging. Unrestricted Lambda/Cloud Function invocation and public API endpoints enable adversary infrastructure within the victim's cloud.",
-      "cloud_examples": "Publicly invocable Lambda functions, API Gateway without auth, Cloud Functions with allUsers invoke permission",
-      "detection_patterns": "aws_lambda_permission, principal, *, invoke, api_gateway_authorizer, allUsers, function_url"
+      "platform": "IaaS",
+      "description": "Adversaries may encrypt data on target systems or on large numbers of systems in a network to interrupt availability to system and network resources. They can attempt to render stored data inaccessible by encrypting files or data on local and remote drives and withholding access to a decryption key. This may be done in order to extract monetary compensation from a victim in exchange for decryption or a decryption key (ransomware) or to render data permanently inaccessible in cases where the k...",
+      "cloud_examples": "",
+      "detection_patterns": ""
     },
     {
       "id": "T1489",
       "name": "Service Stop",
       "tactic": "Impact",
-      "platform": "AWS, Azure, GCP",
-      "description": "Adversaries may stop cloud services to cause disruption. Unrestricted stop/terminate permissions and missing termination protection enable service disruption.",
-      "cloud_examples": "EC2 without termination protection, RDS without deletion protection, unrestricted ec2:StopInstances/TerminateInstances",
-      "detection_patterns": "disable_api_termination, termination_protection, ec2:StopInstances, ec2:TerminateInstances, deletion_protection"
+      "platform": "IaaS",
+      "description": "Adversaries may stop or disable services on a system to render those services unavailable to legitimate users. Stopping critical services or processes can inhibit or stop response to an incident or aid in the adversary's overall objectives to cause damage to the environment.(Citation: Talos Olympic Destroyer 2018)(Citation: Novetta Blockbuster) \n\nAdversaries may accomplish this by disabling individual services of high importance to an organization, such as <code>MSExchangeIS</code>, which wil...",
+      "cloud_examples": "",
+      "detection_patterns": ""
+    },
+    {
+      "id": "T1490",
+      "name": "Inhibit System Recovery",
+      "tactic": "Impact",
+      "platform": "IaaS",
+      "description": "Adversaries may delete or remove built-in data and turn off services designed to aid in the recovery of a corrupted system to prevent recovery.(Citation: Talos Olympic Destroyer 2018)(Citation: FireEye WannaCry 2017) This may deny access to available backups and recovery options.\n\nOperating systems may contain features that can help fix corrupted systems, such as a backup catalog, volume shadow copies, and automatic repair features. Adversaries may disable or delete system recovery features t...",
+      "cloud_examples": "",
+      "detection_patterns": ""
+    },
+    {
+      "id": "T1491",
+      "name": "Defacement",
+      "tactic": "Impact",
+      "platform": "IaaS",
+      "description": "Adversaries may modify visual content available internally or externally to an enterprise network, thus affecting the integrity of the original content. Reasons for [Defacement](https://attack.mitre.org/techniques/T1491) include delivering messaging, intimidation, or claiming (possibly false) credit for an intrusion. Disturbing or offensive images may be used as a part of [Defacement](https://attack.mitre.org/techniques/T1491) in order to cause user discomfort, or to pressure compliance with ...",
+      "cloud_examples": "",
+      "detection_patterns": ""
+    },
+    {
+      "id": "T1491.002",
+      "name": "External Defacement",
+      "tactic": "Impact",
+      "platform": "IaaS",
+      "description": "An adversary may deface systems external to an organization in an attempt to deliver messaging, intimidate, or otherwise mislead an organization or users. [External Defacement](https://attack.mitre.org/techniques/T1491/002) may ultimately cause users to distrust the systems and to question/discredit the system\u2019s integrity. Externally-facing websites are a common victim of defacement; often targeted by adversary and hacktivist groups in order to push a political message or spread propaganda.(C...",
+      "cloud_examples": "",
+      "detection_patterns": ""
+    },
+    {
+      "id": "T1496",
+      "name": "Resource Hijacking",
+      "tactic": "Impact",
+      "platform": "IaaS, SaaS",
+      "description": "Adversaries may leverage the resources of co-opted systems to complete resource-intensive tasks, which may impact system and/or hosted service availability. \n\nResource hijacking may take a number of different forms. For example, adversaries may:\n\n* Leverage compute resources in order to mine cryptocurrency\n* Sell network bandwidth to proxy networks\n* Generate SMS traffic for profit\n* Abuse cloud-based messaging services to send large quantities of spam messages\n\nIn some cases, adversaries may...",
+      "cloud_examples": "",
+      "detection_patterns": ""
+    },
+    {
+      "id": "T1496.001",
+      "name": "Compute Hijacking",
+      "tactic": "Impact",
+      "platform": "IaaS",
+      "description": "Adversaries may leverage the compute resources of co-opted systems to complete resource-intensive tasks, which may impact system and/or hosted service availability. \n\nOne common purpose for [Compute Hijacking](https://attack.mitre.org/techniques/T1496/001) is to validate transactions of cryptocurrency networks and earn virtual currency. Adversaries may consume enough system resources to negatively impact and/or cause affected machines to become unresponsive.(Citation: Kaspersky Lazarus Under ...",
+      "cloud_examples": "",
+      "detection_patterns": ""
+    },
+    {
+      "id": "T1496.002",
+      "name": "Bandwidth Hijacking",
+      "tactic": "Impact",
+      "platform": "IaaS",
+      "description": "Adversaries may leverage the network bandwidth resources of co-opted systems to complete resource-intensive tasks, which may impact system and/or hosted service availability. \n\nAdversaries may also use malware that leverages a system's network bandwidth as part of a botnet in order to facilitate [Network Denial of Service](https://attack.mitre.org/techniques/T1498) campaigns and/or to seed malicious torrents.(Citation: GoBotKR) Alternatively, they may engage in proxyjacking by selling use of ...",
+      "cloud_examples": "",
+      "detection_patterns": ""
+    },
+    {
+      "id": "T1496.003",
+      "name": "SMS Pumping",
+      "tactic": "Impact",
+      "platform": "SaaS",
+      "description": "Adversaries may leverage messaging services for SMS pumping, which may impact system and/or hosted service availability.(Citation: Twilio SMS Pumping) SMS pumping is a type of telecommunications fraud whereby a threat actor first obtains a set of phone numbers from a telecommunications provider, then leverages a victim\u2019s messaging infrastructure to send large amounts of SMS messages to numbers in that set. By generating SMS traffic to their phone number set, a threat actor may earn payments f...",
+      "cloud_examples": "",
+      "detection_patterns": ""
+    },
+    {
+      "id": "T1496.004",
+      "name": "Cloud Service Hijacking",
+      "tactic": "Impact",
+      "platform": "SaaS",
+      "description": "Adversaries may leverage compromised software-as-a-service (SaaS) applications to complete resource-intensive tasks, which may impact hosted service availability. \n\nFor example, adversaries may leverage email and messaging services, such as AWS Simple Email Service (SES), AWS Simple Notification Service (SNS), SendGrid, and Twilio, in order to send large quantities of spam / [Phishing](https://attack.mitre.org/techniques/T1566) emails and SMS messages.(Citation: Invictus IR DangerDev 2024)(Ci...",
+      "cloud_examples": "",
+      "detection_patterns": ""
+    },
+    {
+      "id": "T1498",
+      "name": "Network Denial of Service",
+      "tactic": "Impact",
+      "platform": "IaaS",
+      "description": "Adversaries may perform Network Denial of Service (DoS) attacks to degrade or block the availability of targeted resources to users. Network DoS can be performed by exhausting the network bandwidth services rely on. Example resources include specific websites, email services, DNS, and web-based applications. Adversaries have been observed conducting network DoS attacks for political purposes(Citation: FireEye OpPoisonedHandover February 2016) and to support other malicious activities, includi...",
+      "cloud_examples": "",
+      "detection_patterns": ""
+    },
+    {
+      "id": "T1498.001",
+      "name": "Direct Network Flood",
+      "tactic": "Impact",
+      "platform": "IaaS",
+      "description": "Adversaries may attempt to cause a denial of service (DoS) by directly sending a high-volume of network traffic to a target. This DoS attack may also reduce the availability and functionality of the targeted system(s) and network. [Direct Network Flood](https://attack.mitre.org/techniques/T1498/001)s are when one or more systems are used to send a high-volume of network packets towards the targeted service's network. Almost any network protocol may be used for flooding. Stateless protocols su...",
+      "cloud_examples": "",
+      "detection_patterns": ""
+    },
+    {
+      "id": "T1498.002",
+      "name": "Reflection Amplification",
+      "tactic": "Impact",
+      "platform": "IaaS",
+      "description": "Adversaries may attempt to cause a denial of service (DoS) by reflecting a high-volume of network traffic to a target. This type of Network DoS takes advantage of a third-party server intermediary that hosts and will respond to a given spoofed source IP address. This third-party server is commonly termed a reflector. An adversary accomplishes a reflection attack by sending packets to reflectors with the spoofed address of the victim. Similar to Direct Network Floods, more than one system may ...",
+      "cloud_examples": "",
+      "detection_patterns": ""
+    },
+    {
+      "id": "T1499",
+      "name": "Endpoint Denial of Service",
+      "tactic": "Impact",
+      "platform": "IaaS",
+      "description": "Adversaries may perform Endpoint Denial of Service (DoS) attacks to degrade or block the availability of services to users. Endpoint DoS can be performed by exhausting the system resources those services are hosted on or exploiting the system to cause a persistent crash condition. Example services include websites, email services, DNS, and web-based applications. Adversaries have been observed conducting DoS attacks for political purposes(Citation: FireEye OpPoisonedHandover February 2016) an...",
+      "cloud_examples": "",
+      "detection_patterns": ""
+    },
+    {
+      "id": "T1499.002",
+      "name": "Service Exhaustion Flood",
+      "tactic": "Impact",
+      "platform": "IaaS",
+      "description": "Adversaries may target the different network services provided by systems to conduct a denial of service (DoS). Adversaries often target the availability of DNS and web services, however others have been targeted as well.(Citation: Arbor AnnualDoSreport Jan 2018) Web server software can be attacked through a variety of means, some of which apply generally while others are specific to the software being used to provide the service.\n\nOne example of this type of attack is known as a simple HTTP ...",
+      "cloud_examples": "",
+      "detection_patterns": ""
+    },
+    {
+      "id": "T1499.003",
+      "name": "Application Exhaustion Flood",
+      "tactic": "Impact",
+      "platform": "IaaS",
+      "description": "Adversaries may target resource intensive features of applications to cause a denial of service (DoS), denying availability to those applications. For example, specific features in web applications may be highly resource intensive. Repeated requests to those features may be able to exhaust system resources and deny access to the application or the server itself.(Citation: Arbor AnnualDoSreport Jan 2018)",
+      "cloud_examples": "",
+      "detection_patterns": ""
+    },
+    {
+      "id": "T1499.004",
+      "name": "Application or System Exploitation",
+      "tactic": "Impact",
+      "platform": "IaaS",
+      "description": "Adversaries may exploit software vulnerabilities that can cause an application or system to crash and deny availability to users. (Citation: Sucuri BIND9 August 2015) Some systems may automatically restart critical applications and services when crashes occur, but they can likely be re-exploited to cause a persistent denial of service (DoS) condition.\n\nAdversaries may exploit known or zero-day vulnerabilities to crash applications and/or systems, which may also lead to dependent applications ...",
+      "cloud_examples": "",
+      "detection_patterns": ""
+    },
+    {
+      "id": "T1518",
+      "name": "Software Discovery",
+      "tactic": "Discovery",
+      "platform": "IaaS",
+      "description": "Adversaries may attempt to get a listing of software and software versions that are installed on a system or in a cloud environment. Adversaries may use the information from [Software Discovery](https://attack.mitre.org/techniques/T1518) during automated discovery to shape follow-on behaviors, including whether or not the adversary fully infects the target and/or attempts specific actions.\n\nSuch software may be deployed widely across the environment for configuration management or security re...",
+      "cloud_examples": "",
+      "detection_patterns": ""
+    },
+    {
+      "id": "T1518.001",
+      "name": "Security Software Discovery",
+      "tactic": "Discovery",
+      "platform": "IaaS",
+      "description": "Adversaries may attempt to get a listing of security software, configurations, defensive tools, and sensors that are installed on a system or in a cloud environment. This may include things such as cloud monitoring agents and anti-virus. Adversaries may use the information from [Security Software Discovery](https://attack.mitre.org/techniques/T1518/001) during automated discovery to shape follow-on behaviors, including whether or not the adversary fully infects the target and/or attempts spec...",
+      "cloud_examples": "",
+      "detection_patterns": ""
+    },
+    {
+      "id": "T1525",
+      "name": "Implant Internal Image",
+      "tactic": "Persistence",
+      "platform": "IaaS",
+      "description": "Adversaries may implant cloud or container images with malicious code to establish persistence after gaining access to an environment. Amazon Web Services (AWS) Amazon Machine Images (AMIs), Google Cloud Platform (GCP) Images, and Azure Images as well as popular container runtimes such as Docker can be implanted or backdoored. Unlike [Upload Malware](https://attack.mitre.org/techniques/T1608/001), this technique focuses on adversaries implanting an image in a registry within a victim\u2019s enviro...",
+      "cloud_examples": "",
+      "detection_patterns": ""
+    },
+    {
+      "id": "T1526",
+      "name": "Cloud Service Discovery",
+      "tactic": "Discovery",
+      "platform": "IaaS, SaaS",
+      "description": "An adversary may attempt to enumerate the cloud services running on a system after gaining access. These methods can differ from platform-as-a-service (PaaS), to infrastructure-as-a-service (IaaS), or software-as-a-service (SaaS). Many services exist throughout the various cloud providers and can include Continuous Integration and Continuous Delivery (CI/CD), Lambda Functions, Entra ID, etc. They may also include security services, such as AWS GuardDuty and Microsoft Defender for Cloud, and l...",
+      "cloud_examples": "",
+      "detection_patterns": ""
+    },
+    {
+      "id": "T1528",
+      "name": "Steal Application Access Token",
+      "tactic": "Credential Access",
+      "platform": "IaaS, SaaS",
+      "description": "Adversaries can steal application access tokens as a means of acquiring credentials to access remote systems and resources.\n\nApplication access tokens are used to make authorized API requests on behalf of a user or service and are commonly used as a way to access resources in cloud and container-based applications and software-as-a-service (SaaS).(Citation: Auth0 - Why You Should Always Use Access Tokens to Secure APIs Sept 2019)  Adversaries who steal account API tokens in cloud and containe...",
+      "cloud_examples": "",
+      "detection_patterns": ""
+    },
+    {
+      "id": "T1530",
+      "name": "Data from Cloud Storage",
+      "tactic": "Collection",
+      "platform": "IaaS, SaaS",
+      "description": "Adversaries may access data from cloud storage.\n\nMany IaaS providers offer solutions for online data object storage such as Amazon S3, Azure Storage, and Google Cloud Storage. Similarly, SaaS enterprise platforms such as Office 365 and Google Workspace provide cloud-based document storage to users through services such as OneDrive and Google Drive, while SaaS application providers such as Slack, Confluence, Salesforce, and Dropbox may provide cloud storage solutions as a peripheral or primary...",
+      "cloud_examples": "",
+      "detection_patterns": ""
+    },
+    {
+      "id": "T1531",
+      "name": "Account Access Removal",
+      "tactic": "Impact",
+      "platform": "IaaS, SaaS",
+      "description": "Adversaries may interrupt availability of system and network resources by inhibiting access to accounts utilized by legitimate users. Accounts may be deleted, locked, or manipulated (ex: changed credentials, revoked permissions for SaaS platforms such as Sharepoint) to remove access to accounts.(Citation: Obsidian Security SaaS Ransomware June 2023) Adversaries may also subsequently log off and/or perform a [System Shutdown/Reboot](https://attack.mitre.org/techniques/T1529) to set malicious c...",
+      "cloud_examples": "",
+      "detection_patterns": ""
+    },
+    {
+      "id": "T1534",
+      "name": "Internal Spearphishing",
+      "tactic": "Lateral Movement",
+      "platform": "SaaS",
+      "description": "After they already have access to accounts or systems within the environment, adversaries may use internal spearphishing to gain access to additional information or compromise other users within the same organization. Internal spearphishing is multi-staged campaign where a legitimate account is initially compromised either by controlling the user's device or by compromising the account credentials of the user. Adversaries may then attempt to take advantage of the trusted internal account to i...",
+      "cloud_examples": "",
+      "detection_patterns": ""
+    },
+    {
+      "id": "T1535",
+      "name": "Unused/Unsupported Cloud Regions",
+      "tactic": "Defense Evasion",
+      "platform": "IaaS",
+      "description": "Adversaries may create cloud instances in unused geographic service regions in order to evade detection. Access is usually obtained through compromising accounts used to manage cloud infrastructure.\n\nCloud service providers often provide infrastructure throughout the world in order to improve performance, provide redundancy, and allow customers to meet compliance requirements. Oftentimes, a customer will only use a subset of the available regions and may not actively monitor other regions. If...",
+      "cloud_examples": "",
+      "detection_patterns": ""
+    },
+    {
+      "id": "T1537",
+      "name": "Transfer Data to Cloud Account",
+      "tactic": "Exfiltration",
+      "platform": "IaaS, SaaS",
+      "description": "Adversaries may exfiltrate data by transferring the data, including through sharing/syncing and creating backups of cloud environments, to another cloud account they control on the same service.\n\nA defender who is monitoring for large transfers to outside the cloud environment through normal file transfers or over command and control channels may not be watching for data transfers to another account within the same cloud provider. Such transfers may utilize existing cloud provider APIs and th...",
+      "cloud_examples": "",
+      "detection_patterns": ""
+    },
+    {
+      "id": "T1538",
+      "name": "Cloud Service Dashboard",
+      "tactic": "Discovery",
+      "platform": "IaaS, SaaS",
+      "description": "An adversary may use a cloud service dashboard GUI with stolen credentials to gain useful information from an operational cloud environment, such as specific services, resources, and features. For example, the GCP Command Center can be used to view all assets, review findings of potential security risks, and run additional queries, such as finding public IP addresses and open ports.(Citation: Google Command Center Dashboard)\n\nDepending on the configuration of the environment, an adversary may...",
+      "cloud_examples": "",
+      "detection_patterns": ""
+    },
+    {
+      "id": "T1539",
+      "name": "Steal Web Session Cookie",
+      "tactic": "Credential Access",
+      "platform": "SaaS",
+      "description": "An adversary may steal web application or service session cookies and use them to gain access to web applications or Internet services as an authenticated user without needing credentials. Web applications and services often use session cookies as an authentication token after a user has authenticated to a website.\n\nCookies are often valid for an extended period of time, even if the web application is not actively used. Cookies can be found on disk, in the process memory of the browser, and i...",
+      "cloud_examples": "",
+      "detection_patterns": ""
+    },
+    {
+      "id": "T1546",
+      "name": "Event Triggered Execution",
+      "tactic": "Privilege Escalation, Persistence",
+      "platform": "IaaS, SaaS",
+      "description": "Adversaries may establish persistence and/or elevate privileges using system mechanisms that trigger execution based on specific events. Various operating systems have means to monitor and subscribe to events such as logons or other user activity such as running specific applications/binaries. Cloud environments may also support various functions and services that monitor and can be invoked in response to specific cloud events.(Citation: Backdooring an AWS account)(Citation: Varonis Power Aut...",
+      "cloud_examples": "",
+      "detection_patterns": ""
+    },
+    {
+      "id": "T1548",
+      "name": "Abuse Elevation Control Mechanism",
+      "tactic": "Privilege Escalation, Defense Evasion",
+      "platform": "IaaS",
+      "description": "Adversaries may circumvent mechanisms designed to control elevate privileges to gain higher-level permissions. Most modern systems contain native elevation control mechanisms that are intended to limit privileges that a user can perform on a machine. Authorization has to be granted to specific users in order to perform tasks that can be considered of higher risk.(Citation: TechNet How UAC Works)(Citation: sudo man page 2018) An adversary can perform several methods to take advantage of built-...",
+      "cloud_examples": "",
+      "detection_patterns": ""
+    },
+    {
+      "id": "T1548.005",
+      "name": "Temporary Elevated Cloud Access",
+      "tactic": "Privilege Escalation, Defense Evasion",
+      "platform": "IaaS",
+      "description": "Adversaries may abuse permission configurations that allow them to gain temporarily elevated access to cloud resources. Many cloud environments allow administrators to grant user or service accounts permission to request just-in-time access to roles, impersonate other accounts, pass roles onto resources and services, or otherwise gain short-term access to a set of privileges that may be distinct from their own. \n\nJust-in-time access is a mechanism for granting additional roles to cloud accoun...",
+      "cloud_examples": "",
+      "detection_patterns": ""
+    },
+    {
+      "id": "T1550",
+      "name": "Use Alternate Authentication Material",
+      "tactic": "Defense Evasion, Lateral Movement",
+      "platform": "IaaS, SaaS",
+      "description": "Adversaries may use alternate authentication material, such as password hashes, Kerberos tickets, and application access tokens, in order to move laterally within an environment and bypass normal system access controls. \n\nAuthentication processes generally require a valid identity (e.g., username) along with one or more authentication factors (e.g., password, pin, physical smart card, token generator, etc.). Alternate authentication material is legitimately generated by systems after a user o...",
+      "cloud_examples": "",
+      "detection_patterns": ""
+    },
+    {
+      "id": "T1550.001",
+      "name": "Application Access Token",
+      "tactic": "Defense Evasion, Lateral Movement",
+      "platform": "IaaS, SaaS",
+      "description": "Adversaries may use stolen application access tokens to bypass the typical authentication process and access restricted accounts, information, or services on remote systems. These tokens are typically stolen from users or services and used in lieu of login credentials.\n\nApplication access tokens are used to make authorized API requests on behalf of a user or service and are commonly used to access resources in cloud, container-based applications, and software-as-a-service (SaaS).(Citation: Au...",
+      "cloud_examples": "",
+      "detection_patterns": ""
+    },
+    {
+      "id": "T1550.004",
+      "name": "Web Session Cookie",
+      "tactic": "Defense Evasion, Lateral Movement",
+      "platform": "IaaS, SaaS",
+      "description": "Adversaries can use stolen session cookies to authenticate to web applications and services. This technique bypasses some multi-factor authentication protocols since the session is already authenticated.(Citation: Pass The Cookie)\n\nAuthentication cookies are commonly used in web applications, including cloud-based services, after a user has authenticated to the service so credentials are not passed and re-authentication does not need to occur as frequently. Cookies are often valid for an exte...",
+      "cloud_examples": "",
+      "detection_patterns": ""
+    },
+    {
+      "id": "T1552",
+      "name": "Unsecured Credentials",
+      "tactic": "Credential Access",
+      "platform": "IaaS, SaaS",
+      "description": "Adversaries may search compromised systems to find and obtain insecurely stored credentials. These credentials can be stored and/or misplaced in many locations on a system, including plaintext files (e.g. [Shell History](https://attack.mitre.org/techniques/T1552/003)), operating system or application-specific repositories (e.g. [Credentials in Registry](https://attack.mitre.org/techniques/T1552/002)),  or other specialized files/artifacts (e.g. [Private Keys](https://attack.mitre.org/techniqu...",
+      "cloud_examples": "",
+      "detection_patterns": ""
+    },
+    {
+      "id": "T1552.001",
+      "name": "Credentials In Files",
+      "tactic": "Credential Access",
+      "platform": "IaaS",
+      "description": "Adversaries may search local file systems and remote file shares for files containing insecurely stored credentials. These can be files created by users to store their own credentials, shared credential stores for a group of individuals, configuration files containing passwords for a system or service, or source code/binary files containing embedded passwords.\n\nIt is possible to extract passwords from backups or saved virtual machines through [OS Credential Dumping](https://attack.mitre.org/t...",
+      "cloud_examples": "",
+      "detection_patterns": ""
+    },
+    {
+      "id": "T1552.005",
+      "name": "Cloud Instance Metadata API",
+      "tactic": "Credential Access",
+      "platform": "IaaS",
+      "description": "Adversaries may attempt to access the Cloud Instance Metadata API to collect credentials and other sensitive data.\n\nMost cloud service providers support a Cloud Instance Metadata API which is a service provided to running virtual instances that allows applications to access information about the running virtual instance. Available information generally includes name, security group, and additional metadata including sensitive data such as credentials and UserData scripts that may contain addi...",
+      "cloud_examples": "",
+      "detection_patterns": ""
+    },
+    {
+      "id": "T1552.008",
+      "name": "Chat Messages",
+      "tactic": "Credential Access",
+      "platform": "SaaS",
+      "description": "Adversaries may directly collect unsecured credentials stored or passed through user communication services. Credentials may be sent and stored in user chat communication applications such as email, chat services like Slack or Teams, collaboration tools like Jira or Trello, and any other services that support user communication. Users may share various forms of credentials (such as usernames and passwords, API keys, or authentication tokens) on private or public corporate internal communicati...",
+      "cloud_examples": "",
+      "detection_patterns": ""
+    },
+    {
+      "id": "T1555",
+      "name": "Credentials from Password Stores",
+      "tactic": "Credential Access",
+      "platform": "IaaS",
+      "description": "Adversaries may search for common password storage locations to obtain user credentials.(Citation: F-Secure The Dukes) Passwords are stored in several places on a system, depending on the operating system or application holding the credentials. There are also specific applications and services that store passwords to make them easier for users to manage and maintain, such as password managers and cloud secrets vaults. Once credentials are obtained, they can be used to perform lateral movement...",
+      "cloud_examples": "",
+      "detection_patterns": ""
+    },
+    {
+      "id": "T1555.006",
+      "name": "Cloud Secrets Management Stores",
+      "tactic": "Credential Access",
+      "platform": "IaaS",
+      "description": "Adversaries may acquire credentials from cloud-native secret management solutions such as AWS Secrets Manager, GCP Secret Manager, Azure Key Vault, and Terraform Vault.  \n\nSecrets managers support the secure centralized management of passwords, API keys, and other credential material. Where secrets managers are in use, cloud services can dynamically acquire credentials via API requests rather than accessing secrets insecurely stored in plain text files or environment variables.  \n\nIf an adver...",
+      "cloud_examples": "",
+      "detection_patterns": ""
+    },
+    {
+      "id": "T1556",
+      "name": "Modify Authentication Process",
+      "tactic": "Credential Access, Defense Evasion, Persistence",
+      "platform": "IaaS, SaaS",
+      "description": "Adversaries may modify authentication mechanisms and processes to access user credentials or enable otherwise unwarranted access to accounts. The authentication process is handled by mechanisms, such as the Local Security Authentication Server (LSASS) process and the Security Accounts Manager (SAM) on Windows, pluggable authentication modules (PAM) on Unix-based systems, and authorization plugins on MacOS systems, responsible for gathering, storing, and validating credentials. By modifying an...",
+      "cloud_examples": "",
+      "detection_patterns": ""
+    },
+    {
+      "id": "T1556.006",
+      "name": "Multi-Factor Authentication",
+      "tactic": "Credential Access, Defense Evasion, Persistence",
+      "platform": "IaaS, SaaS",
+      "description": "Adversaries may disable or modify multi-factor authentication (MFA) mechanisms to enable persistent access to compromised accounts.\n\nOnce adversaries have gained access to a network by either compromising an account lacking MFA or by employing an MFA bypass method such as [Multi-Factor Authentication Request Generation](https://attack.mitre.org/techniques/T1621), adversaries may leverage their access to modify or completely disable MFA defenses. This can be accomplished by abusing legitimate ...",
+      "cloud_examples": "",
+      "detection_patterns": ""
+    },
+    {
+      "id": "T1556.007",
+      "name": "Hybrid Identity",
+      "tactic": "Credential Access, Defense Evasion, Persistence",
+      "platform": "IaaS, SaaS",
+      "description": "Adversaries may patch, modify, or otherwise backdoor cloud authentication processes that are tied to on-premises user identities in order to bypass typical authentication mechanisms, access credentials, and enable persistent access to accounts.  \n\nMany organizations maintain hybrid user and device identities that are shared between on-premises and cloud-based environments. These can be maintained in a number of ways. For example, Microsoft Entra ID includes three options for synchronizing ide...",
+      "cloud_examples": "",
+      "detection_patterns": ""
+    },
+    {
+      "id": "T1556.009",
+      "name": "Conditional Access Policies",
+      "tactic": "Credential Access, Defense Evasion, Persistence",
+      "platform": "IaaS",
+      "description": "Adversaries may disable or modify conditional access policies to enable persistent access to compromised accounts. Conditional access policies are additional verifications used by identity providers and identity and access management systems to determine whether a user should be granted access to a resource.\n\nFor example, in Entra ID, Okta, and JumpCloud, users can be denied access to applications based on their IP address, device enrollment status, and use of multi-factor authentication.(Cit...",
+      "cloud_examples": "",
+      "detection_patterns": ""
+    },
+    {
+      "id": "T1562",
+      "name": "Impair Defenses",
+      "tactic": "Defense Evasion",
+      "platform": "IaaS",
+      "description": "Adversaries may maliciously modify components of a victim environment in order to hinder or disable defensive mechanisms. This not only involves impairing preventative defenses, such as firewalls and anti-virus, but also detection capabilities that defenders can use to audit activity and identify malicious behavior. This may also span both native defenses as well as supplemental capabilities installed by users and administrators.\n\nAdversaries may also impair routine operations that contribute...",
+      "cloud_examples": "",
+      "detection_patterns": ""
+    },
+    {
+      "id": "T1562.001",
+      "name": "Disable or Modify Tools",
+      "tactic": "Defense Evasion",
+      "platform": "IaaS",
+      "description": "Adversaries may modify and/or disable security tools to avoid possible detection of their malware/tools and activities. This may take many forms, such as killing security software processes or services, modifying / deleting Registry keys or configuration files so that tools do not operate properly, or other methods to interfere with security tools scanning or reporting information. Adversaries may also disable updates to prevent the latest security patches from reaching tools on victim system...",
+      "cloud_examples": "",
+      "detection_patterns": ""
+    },
+    {
+      "id": "T1562.007",
+      "name": "Disable or Modify Cloud Firewall",
+      "tactic": "Defense Evasion",
+      "platform": "IaaS",
+      "description": "Adversaries may disable or modify a firewall within a cloud environment to bypass controls that limit access to cloud resources. Cloud firewalls are separate from system firewalls that are described in [Disable or Modify System Firewall](https://attack.mitre.org/techniques/T1562/004). \n\nCloud environments typically utilize restrictive security groups and firewall rules that only allow network activity from trusted IP addresses via expected ports and protocols. An adversary with appropriate pe...",
+      "cloud_examples": "",
+      "detection_patterns": ""
+    },
+    {
+      "id": "T1562.008",
+      "name": "Disable or Modify Cloud Logs",
+      "tactic": "Defense Evasion",
+      "platform": "IaaS, SaaS",
+      "description": "An adversary may disable or modify cloud logging capabilities and integrations to limit what data is collected on their activities and avoid detection. Cloud environments allow for collection and analysis of audit and application logs that provide insight into what activities a user does within the environment. If an adversary has sufficient permissions, they can disable or modify logging to avoid detection of their activities.\n\nFor example, in AWS an adversary may disable CloudWatch/CloudTra...",
+      "cloud_examples": "",
+      "detection_patterns": ""
+    },
+    {
+      "id": "T1566",
+      "name": "Phishing",
+      "tactic": "Initial Access",
+      "platform": "SaaS",
+      "description": "Adversaries may send phishing messages to gain access to victim systems. All forms of phishing are electronically delivered social engineering. Phishing can be targeted, known as spearphishing. In spearphishing, a specific individual, company, or industry will be targeted by the adversary. More generally, adversaries can conduct non-targeted phishing, such as in mass malware spam campaigns.\n\nAdversaries may send victims emails containing malicious attachments or links, typically to execute ma...",
+      "cloud_examples": "",
+      "detection_patterns": ""
+    },
+    {
+      "id": "T1566.002",
+      "name": "Spearphishing Link",
+      "tactic": "Initial Access",
+      "platform": "SaaS",
+      "description": "Adversaries may send spearphishing emails with a malicious link in an attempt to gain access to victim systems. Spearphishing with a link is a specific variant of spearphishing. It is different from other forms of spearphishing in that it employs the use of links to download malware contained in email, instead of attaching malicious files to the email itself, to avoid defenses that may inspect email attachments. Spearphishing may also involve social engineering techniques, such as posing as a...",
+      "cloud_examples": "",
+      "detection_patterns": ""
+    },
+    {
+      "id": "T1567",
+      "name": "Exfiltration Over Web Service",
+      "tactic": "Exfiltration",
+      "platform": "SaaS",
+      "description": "Adversaries may use an existing, legitimate external Web service to exfiltrate data rather than their primary command and control channel. Popular Web services acting as an exfiltration mechanism may give a significant amount of cover due to the likelihood that hosts within a network are already communicating with them prior to compromise. Firewall rules may also already exist to permit traffic to these services.\n\nWeb service providers also commonly use SSL/TLS encryption, giving adversaries ...",
+      "cloud_examples": "",
+      "detection_patterns": ""
+    },
+    {
+      "id": "T1567.004",
+      "name": "Exfiltration Over Webhook",
+      "tactic": "Exfiltration",
+      "platform": "SaaS",
+      "description": "Adversaries may exfiltrate data to a webhook endpoint rather than over their primary command and control channel. Webhooks are simple mechanisms for allowing a server to push data over HTTP/S to a client without the need for the client to continuously poll the server.(Citation: RedHat Webhooks) Many public and commercial services, such as Discord, Slack, and `webhook.site`, support the creation of webhook endpoints that can be used by other services, such as Github, Jira, or Trello.(Citation:...",
+      "cloud_examples": "",
+      "detection_patterns": ""
+    },
+    {
+      "id": "T1578",
+      "name": "Modify Cloud Compute Infrastructure",
+      "tactic": "Defense Evasion",
+      "platform": "IaaS",
+      "description": "An adversary may attempt to modify a cloud account's compute service infrastructure to evade defenses. A modification to the compute service infrastructure can include the creation, deletion, or modification of one or more components such as compute instances, virtual machines, and snapshots.\n\nPermissions gained from the modification of infrastructure components may bypass restrictions that prevent access to existing infrastructure. Modifying infrastructure components may also allow an advers...",
+      "cloud_examples": "",
+      "detection_patterns": ""
+    },
+    {
+      "id": "T1578.001",
+      "name": "Create Snapshot",
+      "tactic": "Defense Evasion",
+      "platform": "IaaS",
+      "description": "An adversary may create a snapshot or data backup within a cloud account to evade defenses. A snapshot is a point-in-time copy of an existing cloud compute component such as a virtual machine (VM), virtual hard drive, or volume. An adversary may leverage permissions to create a snapshot in order to bypass restrictions that prevent access to existing compute service infrastructure, unlike in [Revert Cloud Instance](https://attack.mitre.org/techniques/T1578/004) where an adversary may revert to...",
+      "cloud_examples": "",
+      "detection_patterns": ""
+    },
+    {
+      "id": "T1578.002",
+      "name": "Create Cloud Instance",
+      "tactic": "Defense Evasion",
+      "platform": "IaaS",
+      "description": "An adversary may create a new instance or virtual machine (VM) within the compute service of a cloud account to evade defenses. Creating a new instance may allow an adversary to bypass firewall rules and permissions that exist on instances currently residing within an account. An adversary may [Create Snapshot](https://attack.mitre.org/techniques/T1578/001) of one or more volumes in an account, create a new instance, mount the snapshots, and then apply a less restrictive security policy to co...",
+      "cloud_examples": "",
+      "detection_patterns": ""
+    },
+    {
+      "id": "T1578.003",
+      "name": "Delete Cloud Instance",
+      "tactic": "Defense Evasion",
+      "platform": "IaaS",
+      "description": "An adversary may delete a cloud instance after they have performed malicious activities in an attempt to evade detection and remove evidence of their presence.  Deleting an instance or virtual machine can remove valuable forensic artifacts and other evidence of suspicious behavior if the instance is not recoverable.\n\nAn adversary may also [Create Cloud Instance](https://attack.mitre.org/techniques/T1578/002) and later terminate the instance after achieving their objectives.(Citation: Mandiant...",
+      "cloud_examples": "",
+      "detection_patterns": ""
+    },
+    {
+      "id": "T1578.004",
+      "name": "Revert Cloud Instance",
+      "tactic": "Defense Evasion",
+      "platform": "IaaS",
+      "description": "An adversary may revert changes made to a cloud instance after they have performed malicious activities in attempt to evade detection and remove evidence of their presence. In highly virtualized environments, such as cloud-based infrastructure, this may be accomplished by restoring virtual machine (VM) or data storage snapshots through the cloud management dashboard or cloud APIs.\n\nAnother variation of this technique is to utilize temporary storage attached to the compute instance. Most cloud...",
+      "cloud_examples": "",
+      "detection_patterns": ""
+    },
+    {
+      "id": "T1578.005",
+      "name": "Modify Cloud Compute Configurations",
+      "tactic": "Defense Evasion",
+      "platform": "IaaS",
+      "description": "Adversaries may modify settings that directly affect the size, locations, and resources available to cloud compute infrastructure in order to evade defenses. These settings may include service quotas, subscription associations, tenant-wide policies, or other configurations that impact available compute. Such modifications may allow adversaries to abuse the victim\u2019s compute resources to achieve their goals, potentially without affecting the execution of running instances and/or revealing their...",
+      "cloud_examples": "",
+      "detection_patterns": ""
+    },
+    {
+      "id": "T1580",
+      "name": "Cloud Infrastructure Discovery",
+      "tactic": "Discovery",
+      "platform": "IaaS",
+      "description": "An adversary may attempt to discover infrastructure and resources that are available within an infrastructure-as-a-service (IaaS) environment. This includes compute service resources such as instances, virtual machines, and snapshots as well as resources of other services including the storage and database services.\n\nCloud providers offer methods such as APIs and commands issued through CLIs to serve information about infrastructure. For example, AWS provides a <code>DescribeInstances</code> ...",
+      "cloud_examples": "",
+      "detection_patterns": ""
+    },
+    {
+      "id": "T1606",
+      "name": "Forge Web Credentials",
+      "tactic": "Credential Access",
+      "platform": "IaaS, SaaS",
+      "description": "Adversaries may forge credential materials that can be used to gain access to web applications or Internet services. Web applications and services (hosted in cloud SaaS environments or on-premise servers) often use session cookies, tokens, or other materials to authenticate and authorize user access.\n\nAdversaries may generate these credential materials in order to gain access to web resources. This differs from [Steal Web Session Cookie](https://attack.mitre.org/techniques/T1539), [Steal Appl...",
+      "cloud_examples": "",
+      "detection_patterns": ""
+    },
+    {
+      "id": "T1606.001",
+      "name": "Web Cookies",
+      "tactic": "Credential Access",
+      "platform": "IaaS, SaaS",
+      "description": "Adversaries may forge web cookies that can be used to gain access to web applications or Internet services. Web applications and services (hosted in cloud SaaS environments or on-premise servers) often use session cookies to authenticate and authorize user access.\n\nAdversaries may generate these cookies in order to gain access to web resources. This differs from [Steal Web Session Cookie](https://attack.mitre.org/techniques/T1539) and other similar behaviors in that the cookies are new and fo...",
+      "cloud_examples": "",
+      "detection_patterns": ""
+    },
+    {
+      "id": "T1606.002",
+      "name": "SAML Tokens",
+      "tactic": "Credential Access",
+      "platform": "IaaS, SaaS",
+      "description": "An adversary may forge SAML tokens with any permissions claims and lifetimes if they possess a valid SAML token-signing certificate.(Citation: Microsoft SolarWinds Steps) The default lifetime of a SAML token is one hour, but the validity period can be specified in the <code>NotOnOrAfter</code> value of the <code>conditions ...</code> element in a token. This value can be changed using the <code>AccessTokenLifetime</code> in a <code>LifetimeTokenPolicy</code>.(Citation: Microsoft SAML Token Li...",
+      "cloud_examples": "",
+      "detection_patterns": ""
+    },
+    {
+      "id": "T1614",
+      "name": "System Location Discovery",
+      "tactic": "Discovery",
+      "platform": "IaaS",
+      "description": "\nAdversaries may gather information in an attempt to calculate the geographical location of a victim host. Adversaries may use the information from [System Location Discovery](https://attack.mitre.org/techniques/T1614) during automated discovery to shape follow-on behaviors, including whether or not the adversary fully infects the target and/or attempts specific actions.\n\nAdversaries may attempt to infer the location of a system using various system checks, such as time zone, keyboard layout,...",
+      "cloud_examples": "",
+      "detection_patterns": ""
+    },
+    {
+      "id": "T1619",
+      "name": "Cloud Storage Object Discovery",
+      "tactic": "Discovery",
+      "platform": "IaaS",
+      "description": "Adversaries may enumerate objects in cloud storage infrastructure. Adversaries may use this information during automated discovery to shape follow-on behaviors, including requesting all or specific objects from cloud storage.  Similar to [File and Directory Discovery](https://attack.mitre.org/techniques/T1083) on a local host, after identifying available storage services (i.e. [Cloud Infrastructure Discovery](https://attack.mitre.org/techniques/T1580)) adversaries may access the contents/obje...",
+      "cloud_examples": "",
+      "detection_patterns": ""
+    },
+    {
+      "id": "T1621",
+      "name": "Multi-Factor Authentication Request Generation",
+      "tactic": "Credential Access",
+      "platform": "IaaS, SaaS",
+      "description": "Adversaries may attempt to bypass multi-factor authentication (MFA) mechanisms and gain access to accounts by generating MFA requests sent to users.\n\nAdversaries in possession of credentials to [Valid Accounts](https://attack.mitre.org/techniques/T1078) may be unable to complete the login process if they lack access to the 2FA or MFA mechanisms required as an additional credential and security control. To circumvent this, adversaries may abuse the automatic generation of push notifications to...",
+      "cloud_examples": "",
+      "detection_patterns": ""
+    },
+    {
+      "id": "T1648",
+      "name": "Serverless Execution",
+      "tactic": "Execution",
+      "platform": "IaaS, SaaS",
+      "description": "Adversaries may abuse serverless computing, integration, and automation services to execute arbitrary code in cloud environments. Many cloud providers offer a variety of serverless resources, including compute engines, application integration services, and web servers. \n\nAdversaries may abuse these resources in various ways as a means of executing arbitrary commands. For example, adversaries may use serverless functions to execute malicious code, such as crypto-mining malware (i.e. [Resource ...",
+      "cloud_examples": "",
+      "detection_patterns": ""
+    },
+    {
+      "id": "T1651",
+      "name": "Cloud Administration Command",
+      "tactic": "Execution",
+      "platform": "IaaS",
+      "description": "Adversaries may abuse cloud management services to execute commands within virtual machines. Resources such as AWS Systems Manager, Azure RunCommand, and Runbooks allow users to remotely run scripts in virtual machines by leveraging installed virtual machine agents. (Citation: AWS Systems Manager Run Command)(Citation: Microsoft Run Command)\n\nIf an adversary gains administrative access to a cloud environment, they may be able to abuse cloud management services to execute commands in the envir...",
+      "cloud_examples": "",
+      "detection_patterns": ""
+    },
+    {
+      "id": "T1654",
+      "name": "Log Enumeration",
+      "tactic": "Discovery",
+      "platform": "IaaS",
+      "description": "Adversaries may enumerate system and service logs to find useful data. These logs may highlight various types of valuable insights for an adversary, such as user authentication records ([Account Discovery](https://attack.mitre.org/techniques/T1087)), security or vulnerable software ([Software Discovery](https://attack.mitre.org/techniques/T1518)), or hosts within a compromised network ([Remote System Discovery](https://attack.mitre.org/techniques/T1018)).\n\nHost binaries may be leveraged to co...",
+      "cloud_examples": "",
+      "detection_patterns": ""
+    },
+    {
+      "id": "T1656",
+      "name": "Impersonation",
+      "tactic": "Defense Evasion",
+      "platform": "SaaS",
+      "description": "Adversaries may impersonate a trusted person or organization in order to persuade and trick a target into performing some action on their behalf. For example, adversaries may communicate with victims (via [Phishing for Information](https://attack.mitre.org/techniques/T1598), [Phishing](https://attack.mitre.org/techniques/T1566), or [Internal Spearphishing](https://attack.mitre.org/techniques/T1534)) while impersonating a known sender such as an executive, colleague, or third-party vendor. Est...",
+      "cloud_examples": "",
+      "detection_patterns": ""
+    },
+    {
+      "id": "T1657",
+      "name": "Financial Theft",
+      "tactic": "Impact",
+      "platform": "SaaS",
+      "description": "Adversaries may steal monetary resources from targets through extortion, social engineering, technical theft, or other methods aimed at their own financial gain at the expense of the availability of these resources for victims. Financial theft is the ultimate objective of several popular campaign types including extortion by ransomware,(Citation: FBI-ransomware) business email compromise (BEC) and fraud,(Citation: FBI-BEC) \"pig butchering,\"(Citation: wired-pig butchering) bank hacking,(Citati...",
+      "cloud_examples": "",
+      "detection_patterns": ""
+    },
+    {
+      "id": "T1666",
+      "name": "Modify Cloud Resource Hierarchy",
+      "tactic": "Defense Evasion",
+      "platform": "IaaS",
+      "description": "Adversaries may attempt to modify hierarchical structures in infrastructure-as-a-service (IaaS) environments in order to evade defenses.  \n\nIaaS environments often group resources into a hierarchy, enabling improved resource management and application of policies to relevant groups. Hierarchical structures differ among cloud providers. For example, in AWS environments, multiple accounts can be grouped under a single organization, while in Azure environments, multiple subscriptions can be grou...",
+      "cloud_examples": "",
+      "detection_patterns": ""
+    },
+    {
+      "id": "T1671",
+      "name": "Cloud Application Integration",
+      "tactic": "Persistence",
+      "platform": "SaaS",
+      "description": "Adversaries may achieve persistence by leveraging OAuth application integrations in a software-as-a-service environment. Adversaries may create a custom application, add a legitimate application into the environment, or even co-opt an existing integration to achieve malicious ends.(Citation: Push Security SaaS Persistence 2022)(Citation: SaaS Attacks GitHub Evil Twin Integrations)\n\nOAuth is an open standard that allows users to authorize applications to access their information on their behal...",
+      "cloud_examples": "",
+      "detection_patterns": ""
+    },
+    {
+      "id": "T1677",
+      "name": "Poisoned Pipeline Execution",
+      "tactic": "Execution",
+      "platform": "SaaS",
+      "description": "Adversaries may manipulate continuous integration / continuous development (CI/CD) processes by injecting malicious code into the build process. There are several mechanisms for poisoning pipelines: \n\n* In a <b>Direct Pipeline Execution</b> scenario, the threat actor directly modifies the CI configuration file (e.g., `gitlab-ci.yml` in GitLab). They may include a command to exfiltrate credentials leveraged in the build process to a remote server, or to export them as a workflow artifact.(Cita...",
+      "cloud_examples": "",
+      "detection_patterns": ""
+    },
+    {
+      "id": "T1680",
+      "name": "Local Storage Discovery",
+      "tactic": "Discovery",
+      "platform": "IaaS",
+      "description": "Adversaries may enumerate local drives, disks, and/or volumes and their attributes like total or free space and volume serial number. This can be done to prepare for ransomware-related encryption, to perform [Lateral Movement](https://attack.mitre.org/tactics/TA0109), or as a precursor to [Direct Volume Access](https://attack.mitre.org/techniques/T1006). \n\nOn ESXi systems, adversaries may use [Hypervisor CLI](https://attack.mitre.org/techniques/T1059/012) commands such as `esxcli` to list sto...",
+      "cloud_examples": "",
+      "detection_patterns": ""
     }
   ]
 }
