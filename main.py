@@ -11,6 +11,6 @@ class AnalyzeRequest(BaseModel):
 
 
 @app.post("/analyze")
-def analyze(req: AnalyzeRequest):
-    result = analyze_security(req.code, req.filename)
+async def analyze(req: AnalyzeRequest):
+    result = await analyze_security(req.code, req.filename)
     return {"result": result}

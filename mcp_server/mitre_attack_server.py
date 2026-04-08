@@ -139,32 +139,18 @@ def fetch_cloud_techniques() -> str:
 
 @mcp.tool()
 def get_technique(technique_id: str) -> str:
-    """Get full details of a MITRE ATT&CK technique by its ID (e.g. T1078)."""
+    """Get full details of a MITRE ATT&CK cloud technique by its ID (e.g. T1078.004).
+    Only returns techniques tagged for cloud platforms — non-cloud techniques are
+    intentionally excluded."""
+    print(f"[MCP] get_technique called with: {technique_id!r}", file=sys.stderr, flush=True)
     techniques = _get_cloud_techniques()
     for t in techniques:
         if t["id"] == technique_id:
             return json.dumps(t, indent=2)
-
-    # Also search non-cloud techniques
-    bundle = _load_stix_bundle()
-    for obj in bundle.get("objects", []):
-        if obj.get("type") != "attack-pattern":
-            continue
-        attack_id = _extract_attack_id(obj)
-        if attack_id == technique_id:
-            return json.dumps(
-                {
-                    "id": attack_id,
-                    "name": obj.get("name", ""),
-                    "tactic": _extract_tactics(obj),
-                    "platform": ", ".join(obj.get("x_mitre_platforms", [])),
-                    "description": obj.get("description", ""),
-                    "detection": obj.get("x_mitre_detection", ""),
-                },
-                indent=2,
-            )
-
-    return f"Technique {technique_id} not found."
+    return (
+        f"Technique {technique_id} not found in the cloud technique set. "
+        f"This project only handles cloud-tagged techniques."
+    )
 
 
 @mcp.tool()

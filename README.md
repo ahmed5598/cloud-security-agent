@@ -27,67 +27,57 @@ A FastAPI-based security analysis agent for analyzing code and detecting securit
 4. **Configure environment variables**
    - Copy or create a `.env` file in the root directory with your configuration
 
-### Setup Ollama with Docker
+### Setup Ollama
 
-This project uses **Ollama** with the **deepseek-r1:1.5b** model for LLM-based security analysis.
+This project uses **Ollama** with the **llama3.1:8b** model. The model must support
+tool calling — `deepseek-r1` and other reasoning-only models will not work because
+the security agent runs as a tool-using agent loop.
 
-#### Option 1: Using Docker (Recommended)
-
-1. **Install Docker**
-   - Download and install [Docker Desktop](https://www.docker.com/products/docker-desktop) for your OS
-
-2. **Run Ollama container**
+1. **Install Ollama natively** (recommended for Apple Silicon — gives you Metal GPU acceleration)
 
    ```bash
-   docker run -d \
-     --name ollama \
-     -p 11434:11434 \
-     -v ollama:/root/.ollama \
-     ollama/ollama
+   brew install ollama
    ```
 
-   > **Note:** If you get a "container name already in use" error, the container may exist but be stopped. Run `docker container ls -a` to see all containers, then either:
-   > - Remove it: `docker container rm ollama` (then run the command above again)
-   > - Or restart it: `docker container start ollama`
-
-3. **Pull the deepseek-r1:1.5b model**
+2. **Start it as a background service**
 
    ```bash
-   docker exec -it ollama ollama pull deepseek-r1:1.5b
+   brew services start ollama
    ```
 
-   This will download the model (approximately 1-2 GB depending on the version)
-
-4. **Verify Ollama is running**
-
-   ```bash
-   curl http://localhost:11434/api/tags
-   ```
-
-#### Option 2: Direct Installation
-
-If you prefer to install Ollama directly without Docker:
-
-1. **Download and install Ollama**
-   - Visit [ollama.ai](https://ollama.ai) and download the installer for your OS
-
-2. **Start Ollama**
+   Or run it in the foreground in a separate terminal:
 
    ```bash
    ollama serve
    ```
 
-3. **In a new terminal, pull the model**
+3. **Pull the model**
 
    ```bash
-   ollama pull deepseek-r1:1.5b
+   ollama pull llama3.1:8b
    ```
+
+   The model is ~5 GB. You'll need at least 8 GB of free RAM to run it comfortably.
 
 4. **Verify it's working**
 
    ```bash
    ollama list
+   curl http://localhost:11434/api/tags
    ```
+
+> **Note:** `start.sh` will automatically start Ollama (via `brew services start ollama`
+> or `ollama serve` in the background) and pull the model on first run, so the manual
+> steps above are only needed if you want to set it up yourself.
+
+#### Switching models
+
+To use a different model, update `MODEL` in **both** `start.sh` (line 6) and
+`agent/security_agent.py` (the `MODEL` constant). Suggested alternatives:
+
+- `qwen2.5:7b` — similar size, often better at structured output
+- `qwen2.5:14b` — larger, slower, much more reliable for agent loops
+- `llama3.2:3b` — smaller (~2 GB) if you're memory-constrained, but lower quality
 
 ## Running the App
 
@@ -127,12 +117,48 @@ The MCP server (`mcp_server/mitre_attack_server.py`) fetches cloud-relevant MITR
 
 ### Available MCP Tools
 
-| Tool | Description |
-|------|-------------|
-| `fetch_cloud_techniques()` | Fetch all cloud-relevant techniques from MITRE ATT&CK |
-| `get_technique(technique_id)` | Get full details of a technique by ID (e.g. `T1078`) |
-| `search_techniques(query)` | Search techniques by keyword |
-| `sync_to_vectorstore()` | Manually sync techniques to `mitre_techniques.json` and re-index ChromaDB |
+The MCP server exposes **four tools**, but the security agent is only allowed to
+use **one of them** (`get_technique`). The others remain available to other MCP
+clients (e.g. Claude Code) for ad-hoc inspection and maintenance.
+
+| Tool | Description | Available to agent? |
+|------|-------------|---------------------|
+| `fetch_cloud_techniques()` | Fetch all cloud-relevant techniques from MITRE ATT&CK | ❌ |
+| `get_technique(technique_id)` | Get full details of a cloud technique by ID (e.g. `T1078.004`) | ✅ |
+| `search_techniques(query)` | Keyword search over cloud techniques | ❌ |
+| `sync_to_vectorstore()` | Manually sync techniques to `mitre_techniques.json` and re-index ChromaDB | ❌ |
+
+#### Why only one tool is exposed to the agent
+
+The agent has two potential ways to find a technique for a given piece of code:
+
+1. **RAG** — semantic vector search over the indexed local techniques
+   (`retrieve_relevant_techniques`, backed by ChromaDB)
+2. **MCP keyword search** — substring matching against the live STIX bundle
+   (`search_techniques`)
+
+Exposing both paths to a small local model like `llama3.1:8b` causes two
+problems:
+
+- The model often picks the keyword tool because the name is more obvious,
+  bypassing the semantic embeddings entirely. RAG becomes dead weight.
+- The MCP tools can return techniques that aren't in the local cloud-filtered
+  index, so the model ends up reporting findings that are inconsistent with
+  the project's intended scope (cloud-only).
+
+To prevent this, the agent's view of the MCP server is filtered to a single
+tool — `get_technique` — using the Agents SDK's `create_static_tool_filter`.
+This enforces a clean split:
+
+- **RAG = discovery.** The agent must use `retrieve_relevant_techniques`
+  to find candidate techniques. There is no other way.
+- **MCP `get_technique` = verification.** Once RAG returns candidates, the
+  agent fetches the full official record for the candidate it likes most
+  to confirm the mapping before reporting it.
+
+`get_technique` itself is also restricted to cloud-only techniques — the
+non-cloud fallback was removed from `mcp_server/mitre_attack_server.py` so
+the agent cannot pull general (non-cloud) MITRE entries even if it tries.
 
 ### Setup
 
