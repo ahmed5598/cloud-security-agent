@@ -6,7 +6,7 @@ from pathlib import Path
 import requests
 from mcp.server.fastmcp import FastMCP
 
-mcp = FastMCP("mitre-attack")
+mcp = FastMCP("mitre-attack", host="0.0.0.0", port=8000)
 
 STIX_URL = "https://raw.githubusercontent.com/mitre/cti/master/enterprise-attack/enterprise-attack.json"
 CLOUD_PLATFORMS = {
@@ -142,7 +142,11 @@ def get_technique(technique_id: str) -> str:
     """Get full details of a MITRE ATT&CK cloud technique by its ID (e.g. T1078.004).
     Only returns techniques tagged for cloud platforms — non-cloud techniques are
     intentionally excluded."""
-    print(f"[MCP] get_technique called with: {technique_id!r}", file=sys.stderr, flush=True)
+    print(
+        f"[MCP] get_technique called with: {technique_id!r}",
+        file=sys.stderr,
+        flush=True,
+    )
     techniques = _get_cloud_techniques()
     for t in techniques:
         if t["id"] == technique_id:
@@ -170,6 +174,27 @@ def search_techniques(query: str) -> str:
     for t in matches:
         lines.append(f"  {t['id']} - {t['name']} [{t['platform']}]")
     return "\n".join(lines)
+
+
+@mcp.tool()
+def retrieve_relevant_techniques(query: str) -> str:
+    """Semantic search over the local ChromaDB index for the 5 MITRE ATT&CK
+    cloud techniques most relevant to the given query (e.g. a snippet of
+    infrastructure code or a description of a misconfiguration)."""
+    sys.path.insert(0, str(PROJECT_DIR))
+    from agent.vector_store import retrieve_techniques
+
+    results = retrieve_techniques(query, top_k=5)
+    if not results:
+        return "No relevant techniques found."
+
+    lines = []
+    for t in results:
+        lines.append(
+            f"{t['id']} - {t['name']} [tactic: {t.get('tactic','')}]\n"
+            f"  {t.get('description','')}"
+        )
+    return "\n\n".join(lines)
 
 
 @mcp.tool()
@@ -217,4 +242,4 @@ def _auto_sync_on_startup():
 _auto_sync_on_startup()
 
 if __name__ == "__main__":
-    mcp.run()
+    mcp.run(transport="streamable-http")

@@ -82,4 +82,9 @@ def retrieve_techniques(code: str, top_k: int = 5) -> list:
             "cloud_examples": meta["cloud_examples"],
             "distance": results["distances"][0][i] if results.get("distances") else None,
         })
+
+    print("[RAG] Top techniques returned from ChromaDB:", flush=True)
+    for t in techniques:
+        print(f"  - {t['id']} | {t['name']} | tactic={t['tactic']} | distance={t['distance']}", flush=True)
+
     return techniques
