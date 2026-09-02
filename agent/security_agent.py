@@ -10,7 +10,11 @@ Ollama model (via LiteLLM). Tools come from two sources:
 import json
 import os
 import re
+import sys
+from pathlib import Path
 from typing import List
+
+MCP_SERVER_SCRIPT = str(Path(__file__).parent.parent / "mcp_server" / "mitre_attack_server.py")
 
 from pydantic import BaseModel, ValidationError
 
@@ -162,8 +166,8 @@ async def analyze_security(code: str, filename: str) -> str:
     _rag_cache.clear()
     async with MCPServerStdio(
         params={
-            "command": "python",
-            "args": ["mcp_server/mitre_attack_server.py"],
+            "command": sys.executable,
+            "args": [MCP_SERVER_SCRIPT],
         },
         # Force the agent to use RAG for discovery; MCP is verification only.
         # This is important because the model's internal knowledge of MITRE IDs is very unreliable,
@@ -185,3 +189,4 @@ async def analyze_security(code: str, filename: str) -> str:
             )
         report = _parse_report(str(result.final_output))
         return _format_findings(report.findings)
+

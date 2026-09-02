@@ -1,8 +1,10 @@
 {
   "mcpServers": {
     "mitre-attack": {
-      "command": "python",
-      "args": ["mcp_server/mitre_attack_server.py"]
+      "command": "venv/bin/python",
+      "args": [
+        "mcp_server/mitre_attack_server.py"
+      ]
     }
   }
 }

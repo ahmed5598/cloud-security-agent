@@ -6,7 +6,7 @@ from pathlib import Path
 import requests
 from mcp.server.fastmcp import FastMCP
 
-mcp = FastMCP("mitre-attack", host="0.0.0.0", port=8000)
+mcp = FastMCP("mitre-attack")
 
 STIX_URL = "https://raw.githubusercontent.com/mitre/cti/master/enterprise-attack/enterprise-attack.json"
 CLOUD_PLATFORMS = {
@@ -203,9 +203,10 @@ def sync_to_vectorstore() -> str:
 
     This updates data/mitre_techniques.json and triggers ChromaDB re-indexing.
     """
+    print("[MCP] sync_to_vectorstore called", file=sys.stderr, flush=True)
     techniques = _get_cloud_techniques()
     transformed = _transform_for_vectorstore(techniques)
-
+    print(f"[MCP] Transformed {len(transformed)} techniques for vector store", file=sys.stderr, flush=True)
     DATA_FILE.parent.mkdir(parents=True, exist_ok=True)
     with open(DATA_FILE, "w") as f:
         json.dump({"techniques": transformed}, f, indent=2)
@@ -233,6 +234,7 @@ def sync_to_vectorstore() -> str:
 def _auto_sync_on_startup():
     """Auto-sync MITRE ATT&CK data to the vector store on server startup."""
     try:
+        print("Here")
         result = sync_to_vectorstore()
         print(f"[mitre-attack] Auto-sync complete: {result}", file=sys.stderr)
     except Exception as e:
@@ -242,4 +244,4 @@ def _auto_sync_on_startup():
 _auto_sync_on_startup()
 
 if __name__ == "__main__":
-    mcp.run(transport="streamable-http")
+    mcp.run()
