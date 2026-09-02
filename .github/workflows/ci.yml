@@ -11,3 +11,22 @@ jobs:
     steps:
       - name: Say hello
         run: echo "Hello, world!"
+
+  gcp-auth:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - name: Authenticate to GCP via Workload Identity Federation
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: projects/540460980762/locations/global/workloadIdentityPools/github/providers/github-provider
+          service_account: github-actions-ci@secret-351817.iam.gserviceaccount.com
+
+      - uses: google-github-actions/setup-gcloud@v2
+
+      - name: Prove who we are
+        run: |
+          gcloud auth list
+          gcloud projects describe secret-351817 --format="value(projectId,name)"
