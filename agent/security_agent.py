@@ -174,6 +174,9 @@ async def analyze_security(code: str, filename: str) -> str:
         # and we want to ensure all findings are grounded in the indexed techniques.
         # Also, other mcp tools could interfere with the RAG process if allowed, so we restrict to just get_technique.
         tool_filter=create_static_tool_filter(allowed_tool_names=["get_technique"]),
+        # The server syncs MITRE data and re-indexes ChromaDB at startup, which
+        # on a cold machine (CI) takes far longer than the SDK's 5s default.
+        client_session_timeout_seconds=120,
     ) as mcp_server:
         agent = _build_agent(mcp_server)
         user_msg = f"File: {filename}\n\nCode:\n{code}"
