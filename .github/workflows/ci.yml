@@ -28,8 +28,10 @@ jobs:
 
       - name: Install Ollama
         run: |
-          curl -fsSL https://ollama.com/download/ollama-linux-amd64.tgz -o /tmp/ollama.tgz
-          sudo tar -C /usr -xzf /tmp/ollama.tgz
+          curl -fsSL -o /tmp/ollama.tar.zst \
+            https://github.com/ollama/ollama/releases/download/v0.34.0/ollama-linux-amd64.tar.zst
+          sudo tar --zstd -C /usr -xf /tmp/ollama.tar.zst
+          ollama --version
 
       # ~4.7 GB — restoring from cache beats re-downloading every run
       - name: Cache Ollama model
