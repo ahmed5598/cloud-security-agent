@@ -7,7 +7,7 @@ reproduced on a new project/repo — substitute the values in the table below.
 ## Values used here
 
 | Placeholder | Value in this setup |
-|---|---|
+| --- | --- |
 | GCP project ID | `secret-351817` |
 | GCP project **number** | `540460980762` |
 | GitHub repo | `ahmed5598/cloud-security-agent` |

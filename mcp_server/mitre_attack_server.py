@@ -234,7 +234,6 @@ def sync_to_vectorstore() -> str:
 def _auto_sync_on_startup():
     """Auto-sync MITRE ATT&CK data to the vector store on server startup."""
     try:
-        print("Here")
         result = sync_to_vectorstore()
         print(f"[mitre-attack] Auto-sync complete: {result}", file=sys.stderr)
     except Exception as e:
