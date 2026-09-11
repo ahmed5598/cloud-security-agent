@@ -12,6 +12,44 @@ jobs:
       - name: Say hello
         run: echo "Hello, world!"
 
+  security-scan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: pip
+
+      - name: Install Python dependencies
+        run: pip install -r requirements.txt
+
+      - name: Install Ollama
+        run: |
+          curl -fsSL https://ollama.com/download/ollama-linux-amd64.tgz -o /tmp/ollama.tgz
+          sudo tar -C /usr -xzf /tmp/ollama.tgz
+
+      # ~4.7 GB — restoring from cache beats re-downloading every run
+      - name: Cache Ollama model
+        uses: actions/cache@v4
+        with:
+          path: ~/.ollama/models
+          key: ollama-qwen2.5-7b
+
+      - name: Start Ollama and pull model
+        run: |
+          nohup ollama serve > /tmp/ollama.log 2>&1 &
+          for i in $(seq 1 30); do
+            curl -sf http://localhost:11434/api/tags > /dev/null && break
+            sleep 1
+          done
+          ollama pull qwen2.5:7b
+
+      - name: Run security agent on main.tf
+        run: python scan.py main.tf
+
   # gcp-auth:
   #   runs-on: ubuntu-latest
   #   permissions:
